@@ -78,16 +78,16 @@ jobs:
           echo "Found milestone: #$MILESTONE_NUMBER"
 
           # Close the milestone
-          gh api \
+          if gh api \
             --method PATCH \
-            /repos/${{ github.repository }}/milestones/$MILESTONE_NUMBER \
+            /repos/${{ github.repository }}/milestones/"$MILESTONE_NUMBER" \
             -f state=closed \
-            2>/dev/null && {
+            2>/dev/null; then
             echo "✅ Closed milestone #$MILESTONE_NUMBER ($MILESTONE_TITLE)"
-          } || {
+          else
             echo "⚠ Failed to close milestone #$MILESTONE_NUMBER"
             exit 1
-          }
+          fi
 
           # Add to workflow summary
           MILESTONE_URL="https://github.com/${{ github.repository }}/milestone/$MILESTONE_NUMBER?closed=1"
