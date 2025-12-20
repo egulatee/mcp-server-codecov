@@ -120,7 +120,6 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           MILESTONE_NUMBER="${{ steps.milestone.outputs.milestone_number }}"
-          VERSION_TAG="${{ steps.version.outputs.version_tag }}"
 
           echo "Finding PRs merged since last release..."
 
@@ -137,7 +136,7 @@ jobs:
           fi
 
           # Extract PR numbers from merge commits
-          PR_NUMBERS=$(git log --oneline --merges --format="%s" $COMMIT_RANGE \
+          PR_NUMBERS=$(git log --oneline --merges --format="%s" "$COMMIT_RANGE" \
             | grep -oE "Merge pull request #[0-9]+" \
             | grep -oE "[0-9]+" \
             | sort -u)
@@ -147,7 +146,7 @@ jobs:
             exit 0
           fi
 
-          echo "Found PRs to link: $(echo $PR_NUMBERS | tr '\n' ' ')"
+          echo "Found PRs to link: $(echo "$PR_NUMBERS" | tr '\n' ' ')"
 
           # Link each PR to the milestone
           PR_COUNT=0
@@ -155,16 +154,16 @@ jobs:
             echo "Linking PR #$PR_NUMBER to milestone #$MILESTONE_NUMBER..."
 
             # Update PR with milestone
-            gh api \
+            if gh api \
               --method PATCH \
-              /repos/${{ github.repository }}/issues/$PR_NUMBER \
-              -f milestone=$MILESTONE_NUMBER \
-              2>/dev/null && {
+              /repos/${{ github.repository }}/issues/"$PR_NUMBER" \
+              -f milestone="$MILESTONE_NUMBER" \
+              2>/dev/null; then
               echo "✓ Linked PR #$PR_NUMBER"
               PR_COUNT=$((PR_COUNT + 1))
-            } || {
+            else
               echo "⚠ Failed to link PR #$PR_NUMBER (may not exist or already linked)"
-            }
+            fi
           done
 
           echo "✅ Successfully linked $PR_COUNT PRs to milestone"
