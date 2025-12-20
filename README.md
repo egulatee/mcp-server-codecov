@@ -88,7 +88,8 @@ Add to your Claude Desktop configuration file:
 {
   "mcpServers": {
     "codecov": {
-      "command": "mcp-server-codecov",
+      "command": "npx",
+      "args": ["-y", "mcp-server-codecov"],
       "env": {
         "CODECOV_BASE_URL": "https://codecov.io",
         "CODECOV_TOKEN": "your-codecov-token-here"
@@ -127,7 +128,7 @@ Use the Claude Code CLI to add the MCP server with the npm package:
 claude mcp add --transport stdio codecov \
   --env CODECOV_BASE_URL=https://codecov.io \
   --env CODECOV_TOKEN=${CODECOV_TOKEN} \
-  -- mcp-server-codecov
+  -- npx -y mcp-server-codecov
 ```
 
 This automatically configures the server in your `~/.claude.json` file.
@@ -154,7 +155,8 @@ Add to your Claude Code MCP settings file at `~/.claude.json`:
 {
   "mcpServers": {
     "codecov": {
-      "command": "mcp-server-codecov",
+      "command": "npx",
+      "args": ["-y", "mcp-server-codecov"],
       "env": {
         "CODECOV_BASE_URL": "https://codecov.io",
         "CODECOV_TOKEN": "${CODECOV_TOKEN}"
@@ -186,18 +188,19 @@ Add to your Claude Code MCP settings file at `~/.claude.json`:
 **Notes**:
 - Environment variable expansion is supported using `${VAR}` syntax
 - Variables like `${CODECOV_TOKEN}` will be read from your shell environment (e.g., from `~/.zshrc` or `~/.bashrc`)
-- The npm package installation requires no path configuration
+- The `-y` flag for npx automatically accepts the package installation prompt
 
 ### Self-Hosted Codecov
 
-For self-hosted Codecov instances, simply set the `CODECOV_BASE_URL` environment variable to your instance URL. All examples below use the npm package installation.
+For self-hosted Codecov instances, simply set the `CODECOV_BASE_URL` environment variable to your instance URL.
 
 **Claude Desktop:**
 ```json
 {
   "mcpServers": {
     "codecov": {
-      "command": "mcp-server-codecov",
+      "command": "npx",
+      "args": ["-y", "mcp-server-codecov"],
       "env": {
         "CODECOV_BASE_URL": "https://codecov.your-company.com",
         "CODECOV_TOKEN": "your-codecov-token-here"
@@ -212,7 +215,7 @@ For self-hosted Codecov instances, simply set the `CODECOV_BASE_URL` environment
 claude mcp add --transport stdio codecov \
   --env CODECOV_BASE_URL=https://codecov.your-company.com \
   --env CODECOV_TOKEN=${CODECOV_TOKEN} \
-  -- mcp-server-codecov
+  -- npx -y mcp-server-codecov
 ```
 
 **Claude Code Manual (`~/.claude.json`):**
@@ -220,7 +223,8 @@ claude mcp add --transport stdio codecov \
 {
   "mcpServers": {
     "codecov": {
-      "command": "mcp-server-codecov",
+      "command": "npx",
+      "args": ["-y", "mcp-server-codecov"],
       "env": {
         "CODECOV_BASE_URL": "https://codecov.your-company.com",
         "CODECOV_TOKEN": "${CODECOV_TOKEN}"
