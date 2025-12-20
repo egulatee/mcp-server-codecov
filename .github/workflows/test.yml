@@ -29,6 +29,12 @@ jobs:
       - name: Run tests with coverage
         run: npm run test:coverage
 
+      - name: Build for integration tests
+        run: npm run build
+
+      - name: Run integration tests
+        run: npm run test:integration
+
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
