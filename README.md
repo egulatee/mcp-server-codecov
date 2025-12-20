@@ -1,5 +1,7 @@
 # MCP Server for Codecov
 
+[![npm version](https://img.shields.io/npm/v/mcp-server-codecov.svg)](https://www.npmjs.com/package/mcp-server-codecov)
+[![npm downloads](https://img.shields.io/npm/dm/mcp-server-codecov.svg)](https://www.npmjs.com/package/mcp-server-codecov)
 [![codecov](https://codecov.io/gh/egulatee/mcp-server-codecov/branch/main/graph/badge.svg)](https://codecov.io/gh/egulatee/mcp-server-codecov)
 ![Test and Coverage](https://github.com/egulatee/mcp-server-codecov/workflows/Test%20and%20Coverage/badge.svg)
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
@@ -8,6 +10,8 @@
 ![MCP](https://img.shields.io/badge/MCP-Server-orange.svg)
 
 A Model Context Protocol (MCP) server that provides tools for querying Codecov coverage data. Supports both codecov.io and self-hosted Codecov instances with configurable URL endpoints.
+
+📦 **Published on npm:** [mcp-server-codecov](https://www.npmjs.com/package/mcp-server-codecov)
 
 ## Features
 
@@ -208,7 +212,22 @@ claude mcp add --transport stdio codecov \
 
 ## Verification and Troubleshooting
 
-### Verify Installation
+### Verify npm Installation
+
+After installing via npm, verify the package is correctly installed:
+
+```bash
+# Check installed version
+npm list -g mcp-server-codecov
+
+# Verify command is accessible
+which mcp-server-codecov
+
+# Test the package info
+npm view mcp-server-codecov version
+```
+
+### Verify MCP Server Configuration
 
 After configuring the MCP server, verify it's working correctly:
 
@@ -221,6 +240,11 @@ claude mcp get codecov
 ```
 
 You should see:
+```
+codecov: mcp-server-codecov - ✓ Connected
+```
+
+For development installations, the output will show the full path:
 ```
 codecov: node /path/to/codecov-mcp/dist/index.js - ✓ Connected
 ```
