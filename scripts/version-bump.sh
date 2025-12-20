@@ -1,6 +1,26 @@
 #!/bin/bash
 set -e
 
+# ⚠️ DEPRECATION NOTICE ⚠️
+# This script is deprecated and will be removed in v0.3.0
+# Please use the GitHub Actions workflow instead:
+#   https://github.com/egulatee/mcp-server-codecov/actions/workflows/version-bump.yml
+#
+# To trigger the workflow:
+#   1. Go to Actions → Version Bump → Run workflow
+#   2. Select version type (major/minor/patch)
+#   3. Click "Run workflow"
+#
+# The automated workflow provides better audit trails and eliminates manual steps.
+
+echo "⚠️  WARNING: This script is deprecated"
+echo "Please use the GitHub Actions workflow instead:"
+echo "https://github.com/egulatee/mcp-server-codecov/actions/workflows/version-bump.yml"
+echo ""
+echo "Continuing in 5 seconds... (Press Ctrl+C to cancel)"
+sleep 5
+echo ""
+
 VERSION_TYPE=${1:-patch}
 
 if [[ ! "$VERSION_TYPE" =~ ^(major|minor|patch)$ ]]; then

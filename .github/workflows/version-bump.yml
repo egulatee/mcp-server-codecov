@@ -1,0 +1,98 @@
+name: Version Bump
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_type:
+        description: 'Version bump type'
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+        default: 'patch'
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  bump-version:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: Validate branch
+        run: |
+          CURRENT_BRANCH=$(git branch --show-current)
+          if [ "$CURRENT_BRANCH" != "main" ]; then
+            echo "❌ Error: Must be on main branch to bump version"
+            echo "Current branch: $CURRENT_BRANCH"
+            exit 1
+          fi
+          echo "✅ Branch validation passed: on main"
+
+      - name: Validate working directory
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "❌ Error: Working directory not clean"
+            git status --short
+            exit 1
+          fi
+          echo "✅ Working directory is clean"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Configure Git
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+
+      - name: Bump version
+        id: version
+        run: |
+          echo "Bumping version (${{ inputs.version_type }})..."
+          npm version ${{ inputs.version_type }} -m "chore(release): v%s"
+
+          NEW_VERSION=$(node -p "require('./package.json').version")
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "version_tag=v$NEW_VERSION" >> $GITHUB_OUTPUT
+
+          echo "✅ Version bumped to v$NEW_VERSION"
+
+      - name: Push changes
+        run: |
+          echo "Pushing version commit and tag..."
+          git push origin main --follow-tags
+          echo "✅ Changes pushed successfully"
+
+      - name: Output summary
+        run: |
+          echo "## Version Bump Successful! 🚀" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **New Version**: ${{ steps.version.outputs.new_version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version Tag**: ${{ steps.version.outputs.version_tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Bump Type**: ${{ inputs.version_type }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Next Steps" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The release workflow will automatically:" >> $GITHUB_STEP_SUMMARY
+          echo "1. Run all tests" >> $GITHUB_STEP_SUMMARY
+          echo "2. Build the package" >> $GITHUB_STEP_SUMMARY
+          echo "3. Publish to npm" >> $GITHUB_STEP_SUMMARY
+          echo "4. Create a GitHub release" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Monitor the release**: [Release Workflow](https://github.com/${{ github.repository }}/actions/workflows/release.yml)" >> $GITHUB_STEP_SUMMARY
