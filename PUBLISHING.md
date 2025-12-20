@@ -34,38 +34,40 @@ npm run build
 npm run test:integration
 ```
 
-### Step 3: Bump Version
+### Step 3: Trigger Version Bump Workflow
 
-Use the version bump script to increment the version number:
+**Automated via GitHub Actions (Recommended)**:
 
+1. Go to the GitHub repository: https://github.com/egulatee/mcp-server-codecov
+2. Navigate to **Actions** → **Version Bump**
+3. Click **Run workflow**
+4. Select the version bump type:
+   - **patch**: Bug fixes (1.0.0 → 1.0.1)
+   - **minor**: New features (1.0.0 → 1.1.0)
+   - **major**: Breaking changes (1.0.0 → 2.0.0)
+5. Click **Run workflow**
+
+The workflow will automatically:
+- ✅ Validate you're on the `main` branch
+- ✅ Check for a clean working directory
+- ✅ Run `npm version` to bump the version
+- ✅ Create a git commit and tag
+- ✅ Push changes and tags to trigger the release workflow
+
+**Manual via bash script (Deprecated)**:
+
+⚠️ The bash script is deprecated and will be removed in v0.3.0. It's recommended to use the automated workflow above.
+
+If you must use the script:
 ```bash
-# For patch releases (bug fixes): 0.1.0 -> 0.1.1
-./scripts/version-bump.sh patch
-
-# For minor releases (new features): 0.1.1 -> 0.2.0
-./scripts/version-bump.sh minor
-
-# For major releases (breaking changes): 0.2.0 -> 1.0.0
-./scripts/version-bump.sh major
-```
-
-The script will:
-- Validate you're on the `main` branch
-- Check for a clean working directory
-- Run `npm version` to bump the version
-- Create a git commit and tag
-
-### Step 4: Push to GitHub
-
-Push the version commit and tags to trigger the automated release:
-
-```bash
+# This will show a deprecation warning
+./scripts/version-bump.sh patch  # or minor/major
 git push origin main --tags
 ```
 
-### Step 5: Monitor Release Workflow
+### Step 4: Monitor and Verify Publication
 
-The GitHub Actions release workflow will automatically:
+The version bump workflow triggers the release workflow, which will automatically:
 
 1. Run all tests and coverage checks
 2. Build the package
@@ -73,19 +75,20 @@ The GitHub Actions release workflow will automatically:
 4. Publish to npm (without provenance - see Security section)
 5. Create a GitHub release with auto-generated notes
 
-Monitor the workflow at:
+**Monitor the release workflow**:
 ```
-https://github.com/egulatee/mcp-server-codecov/actions
+https://github.com/egulatee/mcp-server-codecov/actions/workflows/release.yml
 ```
 
 **Expected workflow duration**: ~40 seconds
 
 **Successful publication indicators**:
-- Workflow status: ✅ Success
+- Version bump workflow: ✅ Success
+- Release workflow: ✅ Success
 - npm package updated: `npm view mcp-server-codecov version`
 - GitHub release created: https://github.com/egulatee/mcp-server-codecov/releases
 
-### Step 6: Verify Publication
+**Verify Publication**:
 
 After the workflow completes, verify the package was published:
 
