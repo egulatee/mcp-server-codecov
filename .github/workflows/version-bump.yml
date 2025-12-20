@@ -16,6 +16,7 @@ on:
 permissions:
   contents: write
   actions: read
+  issues: write  # Required for milestone operations
 
 jobs:
   bump-version:
@@ -79,6 +80,95 @@ jobs:
           git push origin main --follow-tags
           echo "✅ Changes pushed successfully"
 
+      - name: Create milestone
+        id: milestone
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ steps.version.outputs.new_version }}"
+          MILESTONE_TITLE="v$VERSION"
+
+          echo "Creating milestone: $MILESTONE_TITLE"
+
+          # Check if milestone already exists
+          EXISTING_MILESTONE=$(gh api \
+            /repos/${{ github.repository }}/milestones \
+            --jq ".[] | select(.title==\"$MILESTONE_TITLE\") | .number" \
+            2>/dev/null || echo "")
+
+          if [ -n "$EXISTING_MILESTONE" ]; then
+            echo "✓ Milestone already exists: #$EXISTING_MILESTONE"
+            MILESTONE_NUMBER=$EXISTING_MILESTONE
+          else
+            # Create new milestone with due date set to today
+            DUE_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+            MILESTONE_NUMBER=$(gh api \
+              --method POST \
+              /repos/${{ github.repository }}/milestones \
+              -f title="$MILESTONE_TITLE" \
+              -f description="Release $MILESTONE_TITLE - Auto-generated milestone for tracking PRs included in this release" \
+              -f due_on="$DUE_DATE" \
+              --jq '.number')
+            echo "✓ Created milestone: #$MILESTONE_NUMBER"
+          fi
+
+          echo "milestone_number=$MILESTONE_NUMBER" >> $GITHUB_OUTPUT
+          echo "milestone_title=$MILESTONE_TITLE" >> $GITHUB_OUTPUT
+
+      - name: Link PRs to milestone
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          MILESTONE_NUMBER="${{ steps.milestone.outputs.milestone_number }}"
+          VERSION_TAG="${{ steps.version.outputs.version_tag }}"
+
+          echo "Finding PRs merged since last release..."
+
+          # Get the previous tag (second most recent)
+          PREVIOUS_TAG=$(git tag --sort=-version:refname | sed -n '2p')
+
+          if [ -z "$PREVIOUS_TAG" ]; then
+            echo "⚠ No previous tag found - this is the first release"
+            echo "Checking all merge commits on main branch..."
+            COMMIT_RANGE="main"
+          else
+            echo "Previous tag: $PREVIOUS_TAG"
+            COMMIT_RANGE="$PREVIOUS_TAG..HEAD"
+          fi
+
+          # Extract PR numbers from merge commits
+          PR_NUMBERS=$(git log --oneline --merges --format="%s" $COMMIT_RANGE \
+            | grep -oE "Merge pull request #[0-9]+" \
+            | grep -oE "[0-9]+" \
+            | sort -u)
+
+          if [ -z "$PR_NUMBERS" ]; then
+            echo "⚠ No PRs found in range $COMMIT_RANGE"
+            exit 0
+          fi
+
+          echo "Found PRs to link: $(echo $PR_NUMBERS | tr '\n' ' ')"
+
+          # Link each PR to the milestone
+          PR_COUNT=0
+          for PR_NUMBER in $PR_NUMBERS; do
+            echo "Linking PR #$PR_NUMBER to milestone #$MILESTONE_NUMBER..."
+
+            # Update PR with milestone
+            gh api \
+              --method PATCH \
+              /repos/${{ github.repository }}/issues/$PR_NUMBER \
+              -f milestone=$MILESTONE_NUMBER \
+              2>/dev/null && {
+              echo "✓ Linked PR #$PR_NUMBER"
+              PR_COUNT=$((PR_COUNT + 1))
+            } || {
+              echo "⚠ Failed to link PR #$PR_NUMBER (may not exist or already linked)"
+            }
+          done
+
+          echo "✅ Successfully linked $PR_COUNT PRs to milestone"
+
       - name: Output summary
         run: |
           echo "## Version Bump Successful! 🚀" >> $GITHUB_STEP_SUMMARY
@@ -86,6 +176,7 @@ jobs:
           echo "- **New Version**: ${{ steps.version.outputs.new_version }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Version Tag**: ${{ steps.version.outputs.version_tag }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Bump Type**: ${{ inputs.version_type }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Milestone**: #${{ steps.milestone.outputs.milestone_number }} - ${{ steps.milestone.outputs.milestone_title }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Next Steps" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
@@ -94,5 +185,7 @@ jobs:
           echo "2. Build the package" >> $GITHUB_STEP_SUMMARY
           echo "3. Publish to npm" >> $GITHUB_STEP_SUMMARY
           echo "4. Create a GitHub release" >> $GITHUB_STEP_SUMMARY
+          echo "5. Close the milestone" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Monitor the release**: [Release Workflow](https://github.com/${{ github.repository }}/actions/workflows/release.yml)" >> $GITHUB_STEP_SUMMARY
+          echo "**View milestone**: [Milestone ${{ steps.milestone.outputs.milestone_title }}](https://github.com/${{ github.repository }}/milestone/${{ steps.milestone.outputs.milestone_number }})" >> $GITHUB_STEP_SUMMARY

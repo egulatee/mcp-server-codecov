@@ -11,6 +11,7 @@ jobs:
     permissions:
       contents: write
       id-token: write
+      issues: write  # Required for milestone operations
 
     steps:
       - name: Checkout code
@@ -50,3 +51,45 @@ jobs:
           files: |
             package.json
             README.md
+
+      - name: Close milestone
+        if: success()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Extract version from tag (remove 'v' prefix)
+          VERSION="${GITHUB_REF#refs/tags/v}"
+          MILESTONE_TITLE="v$VERSION"
+
+          echo "Looking for milestone: $MILESTONE_TITLE"
+
+          # Find the milestone number
+          MILESTONE_NUMBER=$(gh api \
+            /repos/${{ github.repository }}/milestones \
+            --jq ".[] | select(.title==\"$MILESTONE_TITLE\") | .number" \
+            2>/dev/null || echo "")
+
+          if [ -z "$MILESTONE_NUMBER" ]; then
+            echo "⚠ Milestone not found: $MILESTONE_TITLE"
+            echo "This may be expected for releases created before milestone automation"
+            exit 0
+          fi
+
+          echo "Found milestone: #$MILESTONE_NUMBER"
+
+          # Close the milestone
+          gh api \
+            --method PATCH \
+            /repos/${{ github.repository }}/milestones/$MILESTONE_NUMBER \
+            -f state=closed \
+            2>/dev/null && {
+            echo "✅ Closed milestone #$MILESTONE_NUMBER ($MILESTONE_TITLE)"
+          } || {
+            echo "⚠ Failed to close milestone #$MILESTONE_NUMBER"
+            exit 1
+          }
+
+          # Add to workflow summary
+          MILESTONE_URL="https://github.com/${{ github.repository }}/milestone/$MILESTONE_NUMBER?closed=1"
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Milestone closed**: [$MILESTONE_TITLE]($MILESTONE_URL)" >> $GITHUB_STEP_SUMMARY
