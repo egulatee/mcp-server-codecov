@@ -8,7 +8,22 @@ A Model Context Protocol (MCP) server that provides tools for querying Codecov c
 - **Commit coverage**: Retrieve coverage statistics for individual commits
 - **Repository coverage**: Get overall coverage metrics for repositories
 - **Configurable URL**: Point to any Codecov instance (codecov.io or self-hosted)
-- **Token authentication**: Optional token support for private repositories
+- **Token authentication**: API token support for accessing coverage data
+
+## Token Types
+
+**Important**: Codecov has two different types of tokens:
+
+- **Upload Token**: Used for pushing coverage reports TO Codecov during CI/CD. Found on your repository's Settings → General page.
+- **API Token**: Used for reading coverage data FROM Codecov via the API. Created in your Codecov Settings → Access tab.
+
+This MCP server requires an **API token**, not an upload token. To create an API token:
+
+1. Go to your Codecov instance (e.g., `https://codecov.io` or your self-hosted URL)
+2. Click on your avatar in the top right → Settings
+3. Navigate to the "Access" tab
+4. Click "Generate Token" and name it (e.g., "MCP Server API Access")
+5. Copy the token value and use it in your configuration
 
 ## Installation
 
@@ -159,6 +174,7 @@ codecov: node /path/to/codecov-mcp/dist/index.js - ✓ Connected
 **1. 401 Unauthorized Error**
 
 If you get a `401 Unauthorized` error when using the tools:
+- **Check token type**: Ensure you're using an **API token** (from Settings → Access), not an upload token
 - Ensure `CODECOV_TOKEN` is set in the MCP server's `env` section
 - Verify the token is valid and has access to the repository
 - For self-hosted instances, confirm you're using the correct `CODECOV_BASE_URL`
