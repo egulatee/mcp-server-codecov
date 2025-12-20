@@ -276,5 +276,25 @@ export function runMainIfDirect(isDirectExec: boolean): void {
   }
 }
 
+// Check if this file is being executed directly
+// We need to resolve symlinks because npm bin creates symlinks to the real file
+import { fileURLToPath } from "url";
+import { realpathSync } from "fs";
+
+function isMainModule(): boolean {
+  try {
+    // Get the real path of the current module
+    const currentModulePath = fileURLToPath(import.meta.url);
+
+    // Get the real path of the executed script (resolves symlinks)
+    const executedScriptPath = realpathSync(process.argv[1]);
+
+    return currentModulePath === executedScriptPath;
+  } catch {
+    // If we can't determine, assume it's being run directly (safer for bin usage)
+    return true;
+  }
+}
+
 // Only run main if this file is being executed directly
-runMainIfDirect(import.meta.url === `file://${process.argv[1]}`);
+runMainIfDirect(isMainModule());
