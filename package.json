@@ -7,14 +7,24 @@
   "bin": {
     "mcp-server-codecov": "dist/index.js"
   },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
     "build": "tsc",
     "watch": "tsc --watch",
     "prepare": "npm run build",
+    "prepublishOnly": "npm test && npm run build",
     "test": "vitest",
     "test:watch": "vitest --watch",
     "test:coverage": "vitest run --coverage",
-    "test:ui": "vitest --ui"
+    "test:ui": "vitest --ui",
+    "test:integration": "vitest run src/__tests__/cli.test.ts"
   },
   "keywords": [
     "mcp",
@@ -22,8 +32,16 @@
     "coverage",
     "model-context-protocol"
   ],
-  "author": "",
+  "author": "Eric Gulatee",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/egulatee/mcp-server-codecov.git"
+  },
+  "homepage": "https://github.com/egulatee/mcp-server-codecov#readme",
+  "bugs": {
+    "url": "https://github.com/egulatee/mcp-server-codecov/issues"
+  },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.4"
   },
