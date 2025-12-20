@@ -1,0 +1,38 @@
+coverage:
+  status:
+    project:
+      default:
+        target: 90%
+        threshold: 1%
+        if_ci_failed: error
+    patch:
+      default:
+        target: 90%
+        threshold: 1%
+        if_ci_failed: error
+
+comment:
+  layout: "reach,diff,flags,tree,files"
+  behavior: default
+  require_changes: false
+  require_base: false
+  require_head: true
+
+ignore:
+  - "dist/**/*"
+  - "node_modules/**/*"
+  - "**/*.test.ts"
+  - "**/__tests__/**"
+  - "test/**"
+
+flag_management:
+  default_rules:
+    carryforward: true
+    statuses:
+      - type: project
+        target: 90%
+      - type: patch
+        target: 90%
+
+github_checks:
+  annotations: true
