@@ -14,6 +14,21 @@ export interface CodecovConfig {
   token?: string;
 }
 
+// Validate environment variables
+export function validateEnvironment(): void {
+  const baseUrl = process.env.CODECOV_BASE_URL;
+
+  if (baseUrl && !baseUrl.startsWith("http://") && !baseUrl.startsWith("https://")) {
+    console.error("ERROR: CODECOV_BASE_URL must start with http:// or https://");
+    console.error(`Received: ${baseUrl}`);
+    process.exit(1);
+  }
+
+  if (baseUrl && baseUrl.startsWith("http://")) {
+    console.warn("WARNING: Using insecure HTTP connection. Consider using HTTPS.");
+  }
+}
+
 // Parse configuration from environment variables
 export function getConfig(): CodecovConfig {
   const baseUrl = process.env.CODECOV_BASE_URL || "https://codecov.io";
@@ -143,6 +158,7 @@ const TOOLS: Tool[] = [
 
 // Main server setup
 export async function main() {
+  validateEnvironment();
   const config = getConfig();
   const client = new CodecovClient(config);
 
