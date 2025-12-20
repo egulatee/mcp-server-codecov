@@ -247,10 +247,18 @@ export async function main() {
   console.error(`Token configured: ${config.token ? "Yes" : "No"}`);
 }
 
-// Only run main if this file is being executed directly
-if (import.meta.url === `file://${process.argv[1]}`) {
-  main().catch((error) => {
-    console.error("Server error:", error);
-    process.exit(1);
-  });
+// Helper function to handle main errors
+export function handleMainError(error: unknown): void {
+  console.error("Server error:", error);
+  process.exit(1);
 }
+
+// Helper function to run main if conditions are met
+export function runMainIfDirect(isDirectExec: boolean): void {
+  if (isDirectExec) {
+    main().catch(handleMainError);
+  }
+}
+
+// Only run main if this file is being executed directly
+runMainIfDirect(import.meta.url === `file://${process.argv[1]}`);
