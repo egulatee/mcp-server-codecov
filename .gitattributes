@@ -1,7 +1,8 @@
 # TypeScript source files
-*.ts linguist-language=TypeScript
-*.tsx linguist-language=TypeScript
-*.d.ts linguist-language=TypeScript
+*.ts linguist-language=TypeScript linguist-detectable=true
+*.tsx linguist-language=TypeScript linguist-detectable=true
+*.d.ts linguist-language=TypeScript linguist-detectable=true
+src/** linguist-language=TypeScript linguist-detectable=true
 
 # Configuration files
 tsconfig.json linguist-language=JSON
