@@ -6,6 +6,9 @@ This guide explains how to publish new versions of `mcp-server-codecov` to npm.
 
 1. **npm account** with publishing permissions for the package
 2. **NPM_TOKEN** secret configured in GitHub repository settings
+   - **CRITICAL**: Must be a **Granular Access Token** with **bypass 2FA enabled**
+   - Classic tokens have been deprecated by npm
+   - See "Token Management" section below for detailed setup
 3. **Maintainer access** to the repository
 
 ## Release Process
@@ -64,15 +67,23 @@ git push origin main --tags
 
 The GitHub Actions release workflow will automatically:
 
-1. Run all tests
+1. Run all tests and coverage checks
 2. Build the package
-3. Publish to npm with provenance
-4. Create a GitHub release
+3. Run integration tests
+4. Publish to npm (without provenance - see Security section)
+5. Create a GitHub release with auto-generated notes
 
 Monitor the workflow at:
 ```
 https://github.com/egulatee/mcp-server-codecov/actions
 ```
+
+**Expected workflow duration**: ~40 seconds
+
+**Successful publication indicators**:
+- Workflow status: ✅ Success
+- npm package updated: `npm view mcp-server-codecov version`
+- GitHub release created: https://github.com/egulatee/mcp-server-codecov/releases
 
 ### Step 6: Verify Publication
 
@@ -165,7 +176,25 @@ npm publish --tag beta
 
 **Problem**: GitHub Actions workflow completed but npm publish failed
 
-**Solutions**:
+**Common Error - E403 Forbidden**:
+```
+npm error code E403
+npm error 403 Forbidden - Two-factor authentication or granular access token with bypass 2fa enabled is required
+```
+
+**Root Cause**: npm token doesn't have bypass 2FA setting enabled
+
+**Solution**:
+1. Create a new Granular Access Token at: https://www.npmjs.com/settings/[USERNAME]/tokens/granular-access-tokens/new
+2. **CRITICAL**: Enable "Bypass two-factor authentication when using this token to publish"
+3. Set permissions: "Packages and scopes" → "Read and write"
+4. Select package: `mcp-server-codecov`
+5. Set expiration (max 90 days for granular tokens)
+6. Copy token immediately
+7. Update GitHub secret: `gh secret set NPM_TOKEN`
+8. Re-trigger release by deleting and recreating the tag
+
+**Other Solutions**:
 1. Check NPM_TOKEN secret is valid in repository settings
 2. Verify token has publish permissions
 3. Check if package version already exists (can't republish same version)
@@ -201,21 +230,63 @@ git push origin v1.0.0
 
 ### npm Provenance
 
-We use npm provenance for trusted publishing:
+**Note**: npm provenance is currently **disabled** for this package.
 
-- Enabled via `--provenance` flag
-- Uses GitHub OIDC tokens (no long-lived secrets)
-- Provides verifiable build attestation
-- Users can verify with: `npm view mcp-server-codecov --json | jq .dist.provenance`
+The `--provenance` flag was removed from the publish workflow because:
+- Granular access tokens may not support provenance attestation
+- Publishing workflow works reliably without it
+- Can be re-enabled in the future when token types support it
+
+To verify package integrity, users can check:
+```bash
+# Verify package tarball checksum
+npm view mcp-server-codecov dist.shasum
+
+# Check package integrity
+npm view mcp-server-codecov dist.integrity
+```
 
 ### Token Management
 
 **NEVER commit NPM_TOKEN to the repository!**
 
-- Store as GitHub secret only
-- Rotate tokens annually
-- Use automation tokens (not personal tokens)
-- Limit token scope to publish-only if possible
+**Creating the Correct Token Type**:
+
+npm has deprecated Classic tokens. You **must** use Granular Access Tokens with specific settings:
+
+1. **Go to**: https://www.npmjs.com/settings/[YOUR_USERNAME]/tokens/granular-access-tokens/new
+
+2. **Token Configuration**:
+   - **Name**: "GitHub Actions CI/CD" (or similar)
+   - **Expiration**: 90 days maximum (set calendar reminder to rotate)
+   - **Packages and scopes**:
+     - Select "Read and write"
+     - Choose "Only select packages and scopes"
+     - Add package: `mcp-server-codecov`
+   - **🚨 CRITICAL SETTING**:
+     - **MUST ENABLE**: "Bypass two-factor authentication when using this token to publish"
+     - Without this setting, CI/CD publishing will fail with E403 error
+
+3. **Copy token immediately** (it won't be shown again)
+
+4. **Add to GitHub**:
+   ```bash
+   gh secret set NPM_TOKEN
+   # Paste token when prompted
+   ```
+
+5. **Set rotation reminder**: Granular tokens expire after 90 days maximum
+
+**Token Rotation Schedule**:
+- Rotate tokens every 90 days (before expiration)
+- Test new token in a separate workflow run before removing old token
+- Keep backup of working token until new one is verified
+
+**Security Best Practices**:
+- Store as GitHub secret only (never commit)
+- Use minimal scope (only mcp-server-codecov package)
+- Enable bypass 2FA only for CI/CD tokens
+- Monitor npm audit logs for unauthorized publish attempts
 
 ## Post-Release Checklist
 

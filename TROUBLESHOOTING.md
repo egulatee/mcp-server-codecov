@@ -4,6 +4,54 @@ This guide helps resolve common issues with the Codecov MCP Server.
 
 ## Installation Issues
 
+### Verify npm Package Installation
+
+Before troubleshooting, verify the package is correctly installed:
+
+**Check package version:**
+```bash
+# Check installed version
+npm list -g mcp-server-codecov
+
+# Verify command exists
+which mcp-server-codecov
+
+# View package info on npm
+npm view mcp-server-codecov version
+npm view mcp-server-codecov dist.tarball
+```
+
+**Expected output:**
+```
+/Users/yourname/.npm-global/lib
+└── mcp-server-codecov@1.0.0
+
+/Users/yourname/.npm-global/bin/mcp-server-codecov
+```
+
+**Verify package contents:**
+```bash
+# Check installed files
+ls -la $(npm root -g)/mcp-server-codecov/dist/
+
+# Should show:
+# index.js
+# index.js.map
+# index.d.ts
+# index.d.ts.map
+```
+
+**Test the command:**
+```bash
+# Should start the MCP server
+mcp-server-codecov
+
+# Expected output:
+# Codecov MCP Server running on stdio
+# Base URL: https://codecov.io
+# Token configured: No (or Yes if CODECOV_TOKEN is set)
+```
+
 ### "command not found: mcp-server-codecov"
 
 After global installation, if the command is not found:
