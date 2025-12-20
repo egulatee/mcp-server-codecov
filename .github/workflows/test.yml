@@ -31,14 +31,13 @@ jobs:
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v5
-        continue-on-error: true
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: egulatee/mcp-server-codecov
           files: ./coverage/lcov.info
           flags: unittests
           name: codecov-mcp-${{ matrix.node-version }}
-          fail_ci_if_error: false
+          fail_ci_if_error: true
           verbose: true
 
       - name: Archive coverage reports
