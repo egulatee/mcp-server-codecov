@@ -9,13 +9,13 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 
 // Configuration interface
-interface CodecovConfig {
+export interface CodecovConfig {
   baseUrl: string;
   token?: string;
 }
 
 // Parse configuration from environment variables
-function getConfig(): CodecovConfig {
+export function getConfig(): CodecovConfig {
   const baseUrl = process.env.CODECOV_BASE_URL || "https://codecov.io";
   const token = process.env.CODECOV_TOKEN;
 
@@ -23,7 +23,7 @@ function getConfig(): CodecovConfig {
 }
 
 // Codecov API client
-class CodecovClient {
+export class CodecovClient {
   private baseUrl: string;
   private token?: string;
 
@@ -142,7 +142,7 @@ const TOOLS: Tool[] = [
 ];
 
 // Main server setup
-async function main() {
+export async function main() {
   const config = getConfig();
   const client = new CodecovClient(config);
 
@@ -247,7 +247,10 @@ async function main() {
   console.error(`Token configured: ${config.token ? "Yes" : "No"}`);
 }
 
-main().catch((error) => {
-  console.error("Server error:", error);
-  process.exit(1);
-});
+// Only run main if this file is being executed directly
+if (import.meta.url === `file://${process.argv[1]}`) {
+  main().catch((error) => {
+    console.error("Server error:", error);
+    process.exit(1);
+  });
+}
