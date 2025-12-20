@@ -47,16 +47,56 @@ Add to your Claude Desktop configuration file:
 }
 ```
 
-### Self-Hosted Codecov
+### Example Configuration for Claude Code
 
-For self-hosted Codecov instances, set the `CODECOV_BASE_URL` to your instance URL:
+Add to your Claude Code MCP settings file:
+
+**Location**: `~/.claude/mcp_settings.json`
 
 ```json
 {
   "mcpServers": {
     "codecov": {
       "command": "node",
+      "args": ["/absolute/path/to/mcp-server-codecov/dist/index.js"],
+      "env": {
+        "CODECOV_BASE_URL": "https://codecov.io",
+        "CODECOV_TOKEN": "your-codecov-token-here"
+      }
+    }
+  }
+}
+```
+
+**Note**: Use absolute paths for the `args` parameter in Claude Code.
+
+### Self-Hosted Codecov
+
+For self-hosted Codecov instances, set the `CODECOV_BASE_URL` to your instance URL:
+
+**Claude Desktop:**
+```json
+{
+  "mcpServers": {
+    "codecov": {
+      "command": "node",
       "args": ["/path/to/mcp-server-codecov/dist/index.js"],
+      "env": {
+        "CODECOV_BASE_URL": "https://codecov.your-company.com",
+        "CODECOV_TOKEN": "your-codecov-token-here"
+      }
+    }
+  }
+}
+```
+
+**Claude Code:**
+```json
+{
+  "mcpServers": {
+    "codecov": {
+      "command": "node",
+      "args": ["/absolute/path/to/mcp-server-codecov/dist/index.js"],
       "env": {
         "CODECOV_BASE_URL": "https://codecov.your-company.com",
         "CODECOV_TOKEN": "your-codecov-token-here"
