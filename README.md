@@ -1,5 +1,7 @@
 # MCP Server for Codecov
 
+[![codecov](https://codecov.io/gh/egulatee/mcp-server-codecov/branch/main/graph/badge.svg)](https://codecov.io/gh/egulatee/mcp-server-codecov)
+
 A Model Context Protocol (MCP) server that provides tools for querying Codecov coverage data. Supports both codecov.io and self-hosted Codecov instances with configurable URL endpoints.
 
 ## Features
