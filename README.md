@@ -49,26 +49,47 @@ Add to your Claude Desktop configuration file:
 
 ### Example Configuration for Claude Code
 
-Add to your Claude Code MCP settings file:
+#### Option 1: CLI Installation (Recommended)
 
-**Location**: `~/.claude/mcp_settings.json`
+Use the Claude Code CLI to add the MCP server:
+
+```bash
+# First, build the server
+cd /path/to/codecov-mcp
+npm install && npm run build
+
+# Add the MCP server with environment variables
+claude mcp add --transport stdio codecov \
+  --env CODECOV_BASE_URL=https://codecov.io \
+  --env CODECOV_TOKEN=${CODECOV_TOKEN} \
+  -- node /absolute/path/to/codecov-mcp/dist/index.js
+```
+
+This will automatically configure the server in your `~/.claude.json` file.
+
+#### Option 2: Manual Configuration
+
+Add to your Claude Code MCP settings file at `~/.claude.json`:
 
 ```json
 {
   "mcpServers": {
     "codecov": {
       "command": "node",
-      "args": ["/absolute/path/to/mcp-server-codecov/dist/index.js"],
+      "args": ["/absolute/path/to/codecov-mcp/dist/index.js"],
       "env": {
         "CODECOV_BASE_URL": "https://codecov.io",
-        "CODECOV_TOKEN": "your-codecov-token-here"
+        "CODECOV_TOKEN": "${CODECOV_TOKEN}"
       }
     }
   }
 }
 ```
 
-**Note**: Use absolute paths for the `args` parameter in Claude Code.
+**Notes**:
+- Use absolute paths for the `args` parameter in Claude Code
+- Environment variable expansion is supported using `${VAR}` syntax
+- Variables like `${CODECOV_TOKEN}` will be read from your shell environment (e.g., from `~/.zshrc` or `~/.bashrc`)
 
 ### Self-Hosted Codecov
 
@@ -90,21 +111,77 @@ For self-hosted Codecov instances, set the `CODECOV_BASE_URL` to your instance U
 }
 ```
 
-**Claude Code:**
+**Claude Code (CLI):**
+```bash
+claude mcp add --transport stdio codecov \
+  --env CODECOV_BASE_URL=https://codecov.your-company.com \
+  --env CODECOV_TOKEN=${CODECOV_TOKEN} \
+  -- node /absolute/path/to/codecov-mcp/dist/index.js
+```
+
+**Claude Code (Manual - `~/.claude.json`):**
 ```json
 {
   "mcpServers": {
     "codecov": {
       "command": "node",
-      "args": ["/absolute/path/to/mcp-server-codecov/dist/index.js"],
+      "args": ["/absolute/path/to/codecov-mcp/dist/index.js"],
       "env": {
         "CODECOV_BASE_URL": "https://codecov.your-company.com",
-        "CODECOV_TOKEN": "your-codecov-token-here"
+        "CODECOV_TOKEN": "${CODECOV_TOKEN}"
       }
     }
   }
 }
 ```
+
+## Verification and Troubleshooting
+
+### Verify Installation
+
+After configuring the MCP server, verify it's working correctly:
+
+```bash
+# List all configured MCP servers
+claude mcp list
+
+# Check the codecov server status
+claude mcp get codecov
+```
+
+You should see:
+```
+codecov: node /path/to/codecov-mcp/dist/index.js - ✓ Connected
+```
+
+### Common Issues
+
+**1. 401 Unauthorized Error**
+
+If you get a `401 Unauthorized` error when using the tools:
+- Ensure `CODECOV_TOKEN` is set in the MCP server's `env` section
+- Verify the token is valid and has access to the repository
+- For self-hosted instances, confirm you're using the correct `CODECOV_BASE_URL`
+
+**2. Environment Variable Not Expanding**
+
+If `${CODECOV_TOKEN}` isn't being replaced:
+- Make sure the variable is exported in your shell (check `~/.zshrc` or `~/.bashrc`)
+- Restart Claude Code after setting environment variables
+- Verify the variable exists: `echo $CODECOV_TOKEN`
+
+**3. HTTP vs HTTPS**
+
+Always use `https://` for the `CODECOV_BASE_URL`, not `http://`:
+- Correct: `https://codecov.egyrllc.com`
+- Incorrect: `http://codecov.egyrllc.com`
+
+**4. Connection Failed**
+
+If the server shows as not connected:
+- Check that the path to `dist/index.js` is correct and absolute
+- Ensure the server is built: `npm run build`
+- Check Claude Code logs for error details
 
 ## Available Tools
 
