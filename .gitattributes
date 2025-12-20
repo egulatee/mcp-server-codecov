@@ -1,0 +1,20 @@
+# TypeScript source files
+*.ts linguist-language=TypeScript
+*.tsx linguist-language=TypeScript
+*.d.ts linguist-language=TypeScript
+
+# Configuration files
+tsconfig.json linguist-language=JSON
+vitest.config.ts linguist-language=TypeScript
+package.json linguist-language=JSON
+
+# Documentation
+*.md linguist-documentation
+
+# Generated/build artifacts
+dist/** linguist-generated=true
+coverage/** linguist-generated=true
+package-lock.json linguist-generated=true
+
+# Vendored dependencies
+node_modules/** linguist-vendored=true
