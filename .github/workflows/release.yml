@@ -1,9 +1,9 @@
-name: Release and Publish
+name: Release to npm
 
 on:
   push:
     tags:
-      - 'v*.*.*'
+      - 'v*'
 
 jobs:
   release:
@@ -11,7 +11,6 @@ jobs:
     permissions:
       contents: write
       id-token: write
-      issues: write  # Required for milestone operations
 
     steps:
       - name: Checkout code
@@ -20,9 +19,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
+          node-version: '20'
           registry-url: 'https://registry.npmjs.org'
-          cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
@@ -30,66 +28,28 @@ jobs:
       - name: Run tests
         run: npm test
 
-      - name: Run coverage tests
-        run: npm run test:coverage
-
-      - name: Build
+      - name: Build package
         run: npm run build
 
-      - name: Run integration tests
-        run: npm run test:integration
-
       - name: Publish to npm
-        run: npm publish --access public --ignore-scripts
+        run: npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Extract version from tag
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Extract changelog for this version
+        id: changelog
+        run: |
+          VERSION=${{ steps.get_version.outputs.VERSION }}
+          sed -n "/## \[$VERSION\]/,/## \[/p" CHANGELOG.md | sed '$d' > release_notes.md
+          cat release_notes.md
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          generate_release_notes: true
-          files: |
-            package.json
-            README.md
-
-      - name: Close milestone
-        if: success()
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          # Extract version from tag (remove 'v' prefix)
-          VERSION="${GITHUB_REF#refs/tags/v}"
-          MILESTONE_TITLE="v$VERSION"
-
-          echo "Looking for milestone: $MILESTONE_TITLE"
-
-          # Find the milestone number
-          MILESTONE_NUMBER=$(gh api \
-            /repos/${{ github.repository }}/milestones \
-            --jq ".[] | select(.title==\"$MILESTONE_TITLE\") | .number" \
-            2>/dev/null || echo "")
-
-          if [ -z "$MILESTONE_NUMBER" ]; then
-            echo "⚠ Milestone not found: $MILESTONE_TITLE"
-            echo "This may be expected for releases created before milestone automation"
-            exit 0
-          fi
-
-          echo "Found milestone: #$MILESTONE_NUMBER"
-
-          # Close the milestone
-          if gh api \
-            --method PATCH \
-            /repos/${{ github.repository }}/milestones/"$MILESTONE_NUMBER" \
-            -f state=closed \
-            2>/dev/null; then
-            echo "✅ Closed milestone #$MILESTONE_NUMBER ($MILESTONE_TITLE)"
-          else
-            echo "⚠ Failed to close milestone #$MILESTONE_NUMBER"
-            exit 1
-          fi
-
-          # Add to workflow summary
-          MILESTONE_URL="https://github.com/${{ github.repository }}/milestone/$MILESTONE_NUMBER?closed=1"
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Milestone closed**: [$MILESTONE_TITLE]($MILESTONE_URL)" >> $GITHUB_STEP_SUMMARY
+          body_path: release_notes.md
+          draft: false
+          prerelease: false

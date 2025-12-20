@@ -20,8 +20,8 @@
     "watch": "tsc --watch",
     "prepare": "npm run build",
     "prepublishOnly": "npm test && npm run build",
-    "test": "vitest",
-    "test:watch": "vitest --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:ui": "vitest --ui",
     "test:integration": "vitest run src/__tests__/cli.test.ts"
