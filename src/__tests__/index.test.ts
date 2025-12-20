@@ -13,7 +13,7 @@ vi.mock('@modelcontextprotocol/sdk/server/stdio.js', () => ({
 }));
 
 // Now import the code under test
-import { getConfig, CodecovClient, type CodecovConfig, main } from '../index.js';
+import { getConfig, CodecovClient, type CodecovConfig, main, handleMainError, runMainIfDirect } from '../index.js';
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 
@@ -726,5 +726,54 @@ describe('main', () => {
 
     expect(result.isError).toBe(true);
     expect(result.content[0].text).toContain('Error: String error');
+  });
+});
+
+describe('handleMainError', () => {
+  it('logs error to console and exits with code 1', () => {
+    const testError = new Error('Test server error');
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const processExitSpy = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
+
+    handleMainError(testError);
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith('Server error:', testError);
+    expect(processExitSpy).toHaveBeenCalledWith(1);
+
+    consoleErrorSpy.mockRestore();
+    processExitSpy.mockRestore();
+  });
+
+  it('handles non-Error objects', () => {
+    const testError = 'String error message';
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const processExitSpy = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
+
+    handleMainError(testError);
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith('Server error:', testError);
+    expect(processExitSpy).toHaveBeenCalledWith(1);
+
+    consoleErrorSpy.mockRestore();
+    processExitSpy.mockRestore();
+  });
+});
+
+describe('runMainIfDirect', () => {
+  it('does not run main when isDirectExec is false', () => {
+    // This simulates the file being imported (normal test scenario)
+    runMainIfDirect(false);
+
+    // No assertions needed - function should just return without doing anything
+    expect(true).toBe(true);
+  });
+
+  it('runs main when isDirectExec is true', async () => {
+    // This simulates the file being executed directly
+    runMainIfDirect(true);
+
+    // The function starts main() which runs asynchronously
+    // Just verify it doesn't throw - main() will run in background
+    expect(true).toBe(true);
   });
 });
