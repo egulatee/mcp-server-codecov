@@ -8,6 +8,7 @@
 ![Node.js Version](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.7+-blue.svg)
 ![MCP](https://img.shields.io/badge/MCP-Server-orange.svg)
+[![MCP Badge](https://lobehub.com/badge/mcp/egulatee-mcp-server-codecov)](https://lobehub.com/mcp/egulatee-mcp-server-codecov)
 
 A Model Context Protocol (MCP) server that provides tools for querying Codecov coverage data. Supports both codecov.io and self-hosted Codecov instances with configurable URL endpoints.
 
