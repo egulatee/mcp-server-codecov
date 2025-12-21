@@ -1,9 +1,18 @@
 {
   "name": "mcp-server-codecov",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "MCP server for querying Codecov coverage data with configurable URL support",
+  "mcpName": "io.github.egulatee/codecov",
+  "publisher": "egulatee",
   "type": "module",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
   "bin": {
     "mcp-server-codecov": "dist/index.js"
   },
@@ -30,9 +39,18 @@
     "mcp",
     "codecov",
     "coverage",
-    "model-context-protocol"
+    "model-context-protocol",
+    "code-coverage",
+    "test-coverage",
+    "ci-cd",
+    "testing",
+    "quality-assurance",
+    "developer-tools"
   ],
-  "author": "Eric Gulatee",
+  "author": {
+    "name": "Eric Gulatee",
+    "url": "https://github.com/egulatee"
+  },
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -41,6 +59,10 @@
   "homepage": "https://github.com/egulatee/mcp-server-codecov#readme",
   "bugs": {
     "url": "https://github.com/egulatee/mcp-server-codecov/issues"
+  },
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.4"
