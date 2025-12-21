@@ -480,12 +480,14 @@ describe('main', () => {
       {
         capabilities: {
           tools: {},
+          prompts: { listChanged: true },
+          resources: { listChanged: false },
         },
       }
     );
 
-    // Verify handlers were registered (2 handlers: ListTools and CallTool)
-    expect(mockSetRequestHandler).toHaveBeenCalledTimes(2);
+    // Verify handlers were registered (6 handlers: ListTools, CallTool, ListPrompts, GetPrompt, ListResources, ReadResource)
+    expect(mockSetRequestHandler).toHaveBeenCalledTimes(6);
 
     // Verify transport was created and connected
     expect(StdioServerTransport).toHaveBeenCalled();

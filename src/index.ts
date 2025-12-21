@@ -5,6 +5,10 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
+  ListPromptsRequestSchema,
+  GetPromptRequestSchema,
+  ListResourcesRequestSchema,
+  ReadResourceRequestSchema,
   Tool,
 } from "@modelcontextprotocol/sdk/types.js";
 import { readFileSync, realpathSync } from 'fs';
@@ -170,6 +174,109 @@ const TOOLS: Tool[] = [
   },
 ];
 
+// Define available prompts
+const PROMPTS = [
+  {
+    name: "analyze_coverage",
+    title: "Analyze Repository Coverage",
+    description: "Get comprehensive coverage analysis for a repository",
+    arguments: [
+      {
+        name: "owner",
+        description: "Repository owner (username or organization)",
+        required: true
+      },
+      {
+        name: "repo",
+        description: "Repository name",
+        required: true
+      },
+      {
+        name: "branch",
+        description: "Branch name (optional, defaults to default branch)",
+        required: false
+      }
+    ]
+  },
+  {
+    name: "compare_commits",
+    title: "Compare Coverage Between Commits",
+    description: "Compare coverage changes between two commits",
+    arguments: [
+      {
+        name: "owner",
+        description: "Repository owner",
+        required: true
+      },
+      {
+        name: "repo",
+        description: "Repository name",
+        required: true
+      },
+      {
+        name: "base_commit",
+        description: "Base commit SHA",
+        required: true
+      },
+      {
+        name: "head_commit",
+        description: "Head commit SHA",
+        required: true
+      }
+    ]
+  },
+  {
+    name: "find_low_coverage",
+    title: "Find Low Coverage Files",
+    description: "Identify files with coverage below a threshold",
+    arguments: [
+      {
+        name: "owner",
+        description: "Repository owner",
+        required: true
+      },
+      {
+        name: "repo",
+        description: "Repository name",
+        required: true
+      },
+      {
+        name: "threshold",
+        description: "Coverage threshold percentage (default: 80)",
+        required: false
+      }
+    ]
+  }
+];
+
+// Define available resources
+const RESOURCES = [
+  {
+    uri: "codecov://docs/getting-started",
+    name: "Getting Started Guide",
+    description: "Quick start guide for using the Codecov MCP server",
+    mimeType: "text/markdown"
+  },
+  {
+    uri: "codecov://examples/github-actions",
+    name: "GitHub Actions Integration",
+    description: "Example GitHub Actions workflow for Codecov",
+    mimeType: "text/yaml"
+  },
+  {
+    uri: "codecov://examples/query-patterns",
+    name: "Common Query Patterns",
+    description: "Examples of common Codecov queries",
+    mimeType: "text/markdown"
+  },
+  {
+    uri: "codecov://docs/configuration",
+    name: "Configuration Guide",
+    description: "How to configure CODECOV_BASE_URL and CODECOV_TOKEN",
+    mimeType: "text/markdown"
+  }
+];
+
 /**
  * Reads version from package.json to ensure consistency
  */
@@ -200,6 +307,8 @@ export async function main() {
     {
       capabilities: {
         tools: {},
+        prompts: { listChanged: true },
+        resources: { listChanged: false },
       },
     }
   );
@@ -293,6 +402,250 @@ export async function main() {
         ],
         isError: true,
       };
+    }
+  });
+
+  // List available prompts
+  server.setRequestHandler(ListPromptsRequestSchema, async () => {
+    return { prompts: PROMPTS };
+  });
+
+  // Get prompt handler
+  server.setRequestHandler(GetPromptRequestSchema, async (request) => {
+    const { name, arguments: args } = request.params;
+
+    const prompt = PROMPTS.find(p => p.name === name);
+    if (!prompt) {
+      throw new Error(`Unknown prompt: ${name}`);
+    }
+
+    if (!args) {
+      throw new Error(`Arguments required for prompt: ${name}`);
+    }
+
+    // Generate appropriate prompt message based on template
+    switch (name) {
+      case "analyze_coverage":
+        return {
+          description: "Analyze coverage for repository",
+          messages: [
+            {
+              role: "user",
+              content: {
+                type: "text",
+                text: `Analyze the code coverage for ${args.owner}/${args.repo}${args.branch ? ` on branch ${args.branch}` : ''}.
+
+Please provide:
+1. Overall coverage percentage
+2. Coverage trends
+3. Areas needing attention
+4. Recommendations for improvement
+
+Use the get_repo_coverage tool to retrieve the data.`
+              }
+            }
+          ]
+        };
+
+      case "compare_commits":
+        return {
+          description: "Compare coverage between commits",
+          messages: [
+            {
+              role: "user",
+              content: {
+                type: "text",
+                text: `Compare code coverage between commits ${args.base_commit} and ${args.head_commit} for ${args.owner}/${args.repo}.
+
+Analyze:
+1. Coverage change (increase/decrease)
+2. Newly covered files
+3. Files with reduced coverage
+4. Impact assessment
+
+Use the get_commit_coverage tool for both commits.`
+              }
+            }
+          ]
+        };
+
+      case "find_low_coverage":
+        const threshold = args.threshold || 80;
+        return {
+          description: "Find files with low coverage",
+          messages: [
+            {
+              role: "user",
+              content: {
+                type: "text",
+                text: `Identify all files in ${args.owner}/${args.repo} with coverage below ${threshold}%.
+
+For each file:
+1. Current coverage percentage
+2. Number of uncovered lines
+3. Priority for improvement
+4. Suggested testing approach
+
+Use get_repo_coverage and get_file_coverage tools.`
+              }
+            }
+          ]
+        };
+
+      default:
+        throw new Error(`Prompt implementation missing: ${name}`);
+    }
+  });
+
+  // List available resources
+  server.setRequestHandler(ListResourcesRequestSchema, async () => {
+    return { resources: RESOURCES };
+  });
+
+  // Read resource handler
+  server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
+    const { uri } = request.params;
+
+    switch (uri) {
+      case "codecov://docs/getting-started":
+        return {
+          contents: [{
+            uri,
+            mimeType: "text/markdown",
+            text: `# Getting Started with Codecov MCP Server
+
+## Installation
+
+\`\`\`bash
+npm install -g mcp-server-codecov
+\`\`\`
+
+## Configuration
+
+Set environment variables:
+- \`CODECOV_BASE_URL\`: Codecov instance URL (default: https://codecov.io)
+- \`CODECOV_TOKEN\`: Your Codecov API token
+
+## Basic Usage
+
+1. Configure your MCP client to use \`mcp-server-codecov\`
+2. Use the available tools:
+   - \`get_repo_coverage\`: Get overall repository coverage
+   - \`get_commit_coverage\`: Get coverage for specific commit
+   - \`get_file_coverage\`: Get line-by-line file coverage
+
+## Example Query
+
+"Show me the coverage for my-org/my-repo"
+`
+          }]
+        };
+
+      case "codecov://examples/github-actions":
+        return {
+          contents: [{
+            uri,
+            mimeType: "text/yaml",
+            text: `name: Code Coverage
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: codecov/codecov-action@v3
+        with:
+          token: \${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: true
+          files: ./coverage/lcov.info
+          flags: unittests
+          name: codecov-umbrella
+`
+          }]
+        };
+
+      case "codecov://examples/query-patterns":
+        return {
+          contents: [{
+            uri,
+            mimeType: "text/markdown",
+            text: `# Common Codecov Query Patterns
+
+## Repository Coverage
+\`\`\`
+"What's the overall coverage for owner/repo?"
+"Show me coverage trends for owner/repo on main branch"
+\`\`\`
+
+## File-Level Coverage
+\`\`\`
+"Get coverage for src/index.ts in owner/repo"
+"Which lines are uncovered in src/utils/helper.ts?"
+\`\`\`
+
+## Commit Analysis
+\`\`\`
+"Show coverage for commit abc123 in owner/repo"
+"How did coverage change in the latest commit?"
+\`\`\`
+
+## Comparative Analysis
+\`\`\`
+"Compare coverage between main and feature-branch"
+"Find files with coverage below 80% in owner/repo"
+\`\`\`
+`
+          }]
+        };
+
+      case "codecov://docs/configuration":
+        return {
+          contents: [{
+            uri,
+            mimeType: "text/markdown",
+            text: `# Configuration Guide
+
+## Environment Variables
+
+### CODECOV_BASE_URL (Optional)
+- Default: \`https://codecov.io\`
+- For self-hosted: \`https://codecov.yourcompany.com\`
+- Must start with \`http://\` or \`https://\`
+
+### CODECOV_TOKEN (Recommended)
+- Required for private repositories
+- Optional for public repositories
+- Get your token from Codecov settings
+
+## Example Configurations
+
+### Public Repository (codecov.io)
+\`\`\`bash
+# No configuration needed for public repos
+\`\`\`
+
+### Private Repository (codecov.io)
+\`\`\`bash
+export CODECOV_TOKEN="your-token-here"
+\`\`\`
+
+### Self-Hosted Codecov
+\`\`\`bash
+export CODECOV_BASE_URL="https://codecov.yourcompany.com"
+export CODECOV_TOKEN="your-token-here"
+\`\`\`
+`
+          }]
+        };
+
+      default:
+        throw new Error(`Unknown resource: ${uri}`);
     }
   });
 
