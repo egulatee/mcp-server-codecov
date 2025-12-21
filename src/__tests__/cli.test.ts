@@ -24,16 +24,21 @@ describe("CLI Integration Tests", () => {
     }
   });
 
-  it("should validate CODECOV_BASE_URL and exit with code 1 for invalid URL", async () => {
+  it("should log warning for invalid URL but continue running", async () => {
     const env = { ...process.env, CODECOV_BASE_URL: "invalid-url-without-protocol" };
 
+    const warnings: string[] = [];
     const result = await new Promise<number>((resolve) => {
       const proc = spawn("node", [distPath], { env });
 
-      // Give it a moment to validate and exit
+      proc.stderr.on("data", (data) => {
+        warnings.push(data.toString());
+      });
+
+      // Server should stay running, we need to kill it
       setTimeout(() => {
         proc.kill();
-        resolve(-1); // Indicate timeout
+        resolve(proc.exitCode || 0);
       }, 2000);
 
       proc.on("exit", (code) => {
@@ -41,7 +46,12 @@ describe("CLI Integration Tests", () => {
       });
     });
 
-    expect(result).toBe(1);
+    const allWarnings = warnings.join("");
+    expect(allWarnings).toContain("WARNING");
+    expect(allWarnings).toContain("CODECOV_BASE_URL");
+    expect(allWarnings).toContain("Tools will fail at execution time");
+    // Server should have started successfully
+    expect(allWarnings).toContain("Codecov MCP Server running");
   });
 
   it("should warn about insecure HTTP but not exit", async () => {

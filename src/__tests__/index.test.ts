@@ -807,3 +807,56 @@ describe('runMainIfDirect', () => {
     expect(true).toBe(true);
   });
 });
+
+describe('Runtime validation with invalid configuration', () => {
+  it('should start server even with invalid CODECOV_BASE_URL', async () => {
+    const originalEnv = process.env.CODECOV_BASE_URL;
+    process.env.CODECOV_BASE_URL = 'invalid-url';
+
+    const mockSetRequestHandler = vi.fn();
+    const mockConnect = vi.fn().mockResolvedValue(undefined);
+
+    vi.mocked(Server).mockImplementationOnce(() => ({
+      setRequestHandler: mockSetRequestHandler,
+      connect: mockConnect,
+    }) as any);
+
+    // Should not throw
+    await main();
+
+    // Server should still connect
+    expect(mockConnect).toHaveBeenCalled();
+
+    process.env.CODECOV_BASE_URL = originalEnv;
+  });
+
+  it('should return error when tool is called with invalid config', async () => {
+    const originalEnv = process.env.CODECOV_BASE_URL;
+    process.env.CODECOV_BASE_URL = 'invalid-url';
+
+    const handlers: any[] = [];
+    vi.mocked(Server).mockImplementationOnce(() => ({
+      setRequestHandler: vi.fn((schema: any, handler: any) => {
+        handlers.push(handler);
+      }),
+      connect: vi.fn().mockResolvedValue(undefined),
+    }) as any);
+
+    await main();
+
+    // Get the CallToolRequestSchema handler (second handler)
+    const callToolHandler = handlers[1];
+    const result = await callToolHandler({
+      params: {
+        name: 'get_file_coverage',
+        arguments: { owner: 'test', repo: 'test', file_path: 'test.ts' }
+      }
+    });
+
+    expect(result.isError).toBe(true);
+    expect(result.content[0].text).toContain('Configuration Error');
+    expect(result.content[0].text).toContain('CODECOV_BASE_URL');
+
+    process.env.CODECOV_BASE_URL = originalEnv;
+  });
+});

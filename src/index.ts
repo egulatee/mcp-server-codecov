@@ -17,14 +17,14 @@ export interface CodecovConfig {
   token?: string;
 }
 
-// Validate environment variables
-export function validateEnvironment(): void {
+// Log configuration warnings without blocking server startup
+export function logConfigurationWarnings(): void {
   const baseUrl = process.env.CODECOV_BASE_URL;
 
   if (baseUrl && !baseUrl.startsWith("http://") && !baseUrl.startsWith("https://")) {
-    console.error("ERROR: CODECOV_BASE_URL must start with http:// or https://");
+    console.error("WARNING: CODECOV_BASE_URL must start with http:// or https://");
     console.error(`Received: ${baseUrl}`);
-    process.exit(1);
+    console.error("Tools will fail at execution time if this URL is invalid.");
   }
 
   if (baseUrl && baseUrl.startsWith("http://")) {
@@ -38,6 +38,17 @@ export function getConfig(): CodecovConfig {
   const token = process.env.CODECOV_TOKEN;
 
   return { baseUrl, token };
+}
+
+/**
+ * Validates configuration at tool execution time
+ * Returns error message if invalid, undefined if valid
+ */
+function validateConfigForExecution(config: CodecovConfig): string | undefined {
+  if (!config.baseUrl.startsWith("http://") && !config.baseUrl.startsWith("https://")) {
+    return `Invalid CODECOV_BASE_URL: "${config.baseUrl}". Must start with http:// or https://.\n\nPlease set a valid CODECOV_BASE_URL environment variable.`;
+  }
+  return undefined;
 }
 
 // Codecov API client
@@ -171,13 +182,13 @@ function getPackageVersion(): string {
     return packageJson.version;
   } catch (error) {
     console.error('Warning: Could not read version from package.json');
-    return '1.0.1'; // Fallback to current version
+    return '1.0.2'; // Fallback to current version
   }
 }
 
 // Main server setup
 export async function main() {
-  validateEnvironment();
+  logConfigurationWarnings();
   const config = getConfig();
   const client = new CodecovClient(config);
 
@@ -201,6 +212,18 @@ export async function main() {
   // Handle tool calls
   server.setRequestHandler(CallToolRequestSchema, async (request) => {
     const { name, arguments: args } = request.params;
+
+    // Validate configuration before executing tools
+    const configError = validateConfigForExecution(config);
+    if (configError) {
+      return {
+        content: [{
+          type: "text",
+          text: `Configuration Error:\n\n${configError}`,
+        }],
+        isError: true,
+      };
+    }
 
     try {
       switch (name) {
