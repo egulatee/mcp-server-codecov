@@ -1,4 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 
 // Mock the MCP SDK modules before importing our code
 vi.mock('@modelcontextprotocol/sdk/server/index.js', () => ({
@@ -464,11 +466,16 @@ describe('main', () => {
     // Run main
     await main();
 
+    // Read expected version from package.json
+    const packageJson = JSON.parse(
+      readFileSync(join(__dirname, '../../package.json'), 'utf-8')
+    );
+
     // Verify Server was created
     expect(Server).toHaveBeenCalledWith(
       {
         name: 'mcp-server-codecov',
-        version: '0.1.0',
+        version: packageJson.version,
       },
       {
         capabilities: {
@@ -488,6 +495,29 @@ describe('main', () => {
     expect(consoleErrorSpy).toHaveBeenCalledWith('Codecov MCP Server running on stdio');
 
     consoleErrorSpy.mockRestore();
+  });
+
+  it('uses package.json version for server initialization', async () => {
+    const mockSetRequestHandler = vi.fn();
+    const mockConnect = vi.fn().mockResolvedValue(undefined);
+
+    vi.mocked(Server).mockImplementationOnce((info, options) => {
+      // Verify version matches package.json
+      const packageJson = JSON.parse(
+        readFileSync(join(__dirname, '../../package.json'), 'utf-8')
+      );
+      expect(info.version).toBe(packageJson.version);
+
+      return {
+        setRequestHandler: mockSetRequestHandler,
+        connect: mockConnect,
+      } as any;
+    });
+
+    vi.mocked(StdioServerTransport).mockImplementationOnce(() => ({}) as any);
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    await main();
   });
 
   it('handles ListToolsRequestSchema handler', async () => {

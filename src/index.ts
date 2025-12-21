@@ -7,6 +7,9 @@ import {
   ListToolsRequestSchema,
   Tool,
 } from "@modelcontextprotocol/sdk/types.js";
+import { readFileSync, realpathSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 
 // Configuration interface
 export interface CodecovConfig {
@@ -156,6 +159,22 @@ const TOOLS: Tool[] = [
   },
 ];
 
+/**
+ * Reads version from package.json to ensure consistency
+ */
+function getPackageVersion(): string {
+  try {
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = dirname(__filename);
+    const packageJsonPath = join(__dirname, '../package.json');
+    const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
+    return packageJson.version;
+  } catch (error) {
+    console.error('Warning: Could not read version from package.json');
+    return '1.0.1'; // Fallback to current version
+  }
+}
+
 // Main server setup
 export async function main() {
   validateEnvironment();
@@ -165,7 +184,7 @@ export async function main() {
   const server = new Server(
     {
       name: "mcp-server-codecov",
-      version: "0.1.0",
+      version: getPackageVersion(),
     },
     {
       capabilities: {
@@ -278,9 +297,6 @@ export function runMainIfDirect(isDirectExec: boolean): void {
 
 // Check if this file is being executed directly
 // We need to resolve symlinks because npm bin creates symlinks to the real file
-import { fileURLToPath } from "url";
-import { realpathSync } from "fs";
-
 function isMainModule(): boolean {
   try {
     // Get the real path of the current module
