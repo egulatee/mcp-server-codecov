@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.3] - 2025-12-21
+
+### Fixed
+- Fixed LobeHub validation failures by deferring environment validation (#42)
+- Server no longer exits early when `CODECOV_BASE_URL` has invalid format
+- Environment validation now logs warnings instead of calling `process.exit(1)`
+- Invalid configuration errors now occur at tool execution time with helpful messages
+
+### Changed
+- Renamed `validateEnvironment()` to `logConfigurationWarnings()` to reflect new behavior
+- Added `validateConfigForExecution()` for runtime configuration validation
+- Updated CLI test expectations to verify server continues running with invalid config
+- Updated version fallback to 1.0.3
+
+### Added
+- Runtime validation test suite to verify server behavior with invalid configuration
+- Configuration error messages now include guidance for fixing invalid URLs
+
 ## [1.0.2] - 2025-12-21
 
 ### Fixed
@@ -45,5 +63,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Comprehensive test suite with 97%+ code coverage
 - Published to npm registry as `mcp-server-codecov`
 
+[1.0.3]: https://github.com/egulatee/mcp-server-codecov/compare/v1.0.2...v1.0.3
+[1.0.2]: https://github.com/egulatee/mcp-server-codecov/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/egulatee/mcp-server-codecov/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/egulatee/mcp-server-codecov/releases/tag/v1.0.0
