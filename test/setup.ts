@@ -1,7 +1,11 @@
 import { vi, beforeEach } from 'vitest';
 
-// Mock global fetch
-global.fetch = vi.fn() as any;
+// Mock global fetch - vitest v4 requires function implementation
+global.fetch = vi.fn(async () => ({
+  ok: true,
+  status: 200,
+  json: async () => ({}),
+})) as any;
 
 // Reset mocks and environment before each test
 beforeEach(() => {

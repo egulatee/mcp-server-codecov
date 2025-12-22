@@ -4,14 +4,14 @@ import { join } from 'path';
 
 // Mock the MCP SDK modules before importing our code
 vi.mock('@modelcontextprotocol/sdk/server/index.js', () => ({
-  Server: vi.fn().mockImplementation(() => ({
-    setRequestHandler: vi.fn(),
-    connect: vi.fn().mockResolvedValue(undefined),
-  })),
+  Server: vi.fn(class {
+    setRequestHandler = vi.fn(() => {});
+    connect = vi.fn(async () => undefined);
+  }),
 }));
 
 vi.mock('@modelcontextprotocol/sdk/server/stdio.js', () => ({
-  StdioServerTransport: vi.fn(),
+  StdioServerTransport: vi.fn(class {}),
 }));
 
 // Now import the code under test
@@ -450,15 +450,19 @@ describe('CodecovClient', () => {
 describe('main', () => {
   it('initializes and starts the MCP server', async () => {
     // Setup mocks
-    const mockSetRequestHandler = vi.fn();
-    const mockConnect = vi.fn().mockResolvedValue(undefined);
+    const mockSetRequestHandler = vi.fn(() => {});
+    const mockConnect = vi.fn(() => {}).mockResolvedValue(undefined);
 
-    vi.mocked(Server).mockImplementationOnce(() => ({
-      setRequestHandler: mockSetRequestHandler,
-      connect: mockConnect,
-    }) as any);
+    vi.mocked(Server).mockImplementationOnce(function() {
+      return {
+        setRequestHandler: mockSetRequestHandler,
+        connect: mockConnect,
+      } as any;
+    });
 
-    vi.mocked(StdioServerTransport).mockImplementationOnce(() => ({}) as any);
+    vi.mocked(StdioServerTransport).mockImplementationOnce(function() {
+      return {} as any;
+    });
 
     // Mock console.error to avoid noise in test output
     const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -500,10 +504,10 @@ describe('main', () => {
   });
 
   it('uses package.json version for server initialization', async () => {
-    const mockSetRequestHandler = vi.fn();
-    const mockConnect = vi.fn().mockResolvedValue(undefined);
+    const mockSetRequestHandler = vi.fn(() => {});
+    const mockConnect = vi.fn(() => {}).mockResolvedValue(undefined);
 
-    vi.mocked(Server).mockImplementationOnce((info, options) => {
+    vi.mocked(Server).mockImplementationOnce(function(info, options) {
       // Verify version matches package.json
       const packageJson = JSON.parse(
         readFileSync(join(__dirname, '../../package.json'), 'utf-8')
@@ -516,7 +520,7 @@ describe('main', () => {
       } as any;
     });
 
-    vi.mocked(StdioServerTransport).mockImplementationOnce(() => ({}) as any);
+    vi.mocked(StdioServerTransport).mockImplementationOnce(function() { return {} as any; });
     vi.spyOn(console, 'error').mockImplementation(() => {});
 
     await main();
@@ -529,12 +533,12 @@ describe('main', () => {
       handlers.push(handler);
     });
 
-    vi.mocked(Server).mockImplementationOnce(() => ({
+    vi.mocked(Server).mockImplementationOnce(function() { return {
       setRequestHandler: mockSetRequestHandler,
-      connect: vi.fn().mockResolvedValue(undefined),
-    }) as any);
+      connect: vi.fn(() => {}).mockResolvedValue(undefined),
+    } as any; });
 
-    vi.mocked(StdioServerTransport).mockImplementationOnce(() => ({}) as any);
+    vi.mocked(StdioServerTransport).mockImplementationOnce(function() { return {} as any; });
     vi.spyOn(console, 'error').mockImplementation(() => {});
 
     await main();
@@ -559,12 +563,12 @@ describe('main', () => {
       handlers.push(handler);
     });
 
-    vi.mocked(Server).mockImplementationOnce(() => ({
+    vi.mocked(Server).mockImplementationOnce(function() { return {
       setRequestHandler: mockSetRequestHandler,
-      connect: vi.fn().mockResolvedValue(undefined),
-    }) as any);
+      connect: vi.fn(() => {}).mockResolvedValue(undefined),
+    } as any; });
 
-    vi.mocked(StdioServerTransport).mockImplementationOnce(() => ({}) as any);
+    vi.mocked(StdioServerTransport).mockImplementationOnce(function() { return {} as any; });
     vi.spyOn(console, 'error').mockImplementation(() => {});
 
     const mockData = { coverage: 85.5 };
@@ -597,12 +601,12 @@ describe('main', () => {
       handlers.push(handler);
     });
 
-    vi.mocked(Server).mockImplementationOnce(() => ({
+    vi.mocked(Server).mockImplementationOnce(function() { return {
       setRequestHandler: mockSetRequestHandler,
-      connect: vi.fn().mockResolvedValue(undefined),
-    }) as any);
+      connect: vi.fn(() => {}).mockResolvedValue(undefined),
+    } as any; });
 
-    vi.mocked(StdioServerTransport).mockImplementationOnce(() => ({}) as any);
+    vi.mocked(StdioServerTransport).mockImplementationOnce(function() { return {} as any; });
     vi.spyOn(console, 'error').mockImplementation(() => {});
 
     const mockData = { coverage: 92.1 };
@@ -632,12 +636,12 @@ describe('main', () => {
       handlers.push(handler);
     });
 
-    vi.mocked(Server).mockImplementationOnce(() => ({
+    vi.mocked(Server).mockImplementationOnce(function() { return {
       setRequestHandler: mockSetRequestHandler,
-      connect: vi.fn().mockResolvedValue(undefined),
-    }) as any);
+      connect: vi.fn(() => {}).mockResolvedValue(undefined),
+    } as any; });
 
-    vi.mocked(StdioServerTransport).mockImplementationOnce(() => ({}) as any);
+    vi.mocked(StdioServerTransport).mockImplementationOnce(function() { return {} as any; });
     vi.spyOn(console, 'error').mockImplementation(() => {});
 
     const mockData = { coverage: 88.0 };
@@ -667,12 +671,12 @@ describe('main', () => {
       handlers.push(handler);
     });
 
-    vi.mocked(Server).mockImplementationOnce(() => ({
+    vi.mocked(Server).mockImplementationOnce(function() { return {
       setRequestHandler: mockSetRequestHandler,
-      connect: vi.fn().mockResolvedValue(undefined),
-    }) as any);
+      connect: vi.fn(() => {}).mockResolvedValue(undefined),
+    } as any; });
 
-    vi.mocked(StdioServerTransport).mockImplementationOnce(() => ({}) as any);
+    vi.mocked(StdioServerTransport).mockImplementationOnce(function() { return {} as any; });
     vi.spyOn(console, 'error').mockImplementation(() => {});
 
     await main();
@@ -695,12 +699,12 @@ describe('main', () => {
       handlers.push(handler);
     });
 
-    vi.mocked(Server).mockImplementationOnce(() => ({
+    vi.mocked(Server).mockImplementationOnce(function() { return {
       setRequestHandler: mockSetRequestHandler,
-      connect: vi.fn().mockResolvedValue(undefined),
-    }) as any);
+      connect: vi.fn(() => {}).mockResolvedValue(undefined),
+    } as any; });
 
-    vi.mocked(StdioServerTransport).mockImplementationOnce(() => ({}) as any);
+    vi.mocked(StdioServerTransport).mockImplementationOnce(function() { return {} as any; });
     vi.spyOn(console, 'error').mockImplementation(() => {});
 
     // Mock fetch to throw an error
@@ -731,12 +735,12 @@ describe('main', () => {
       handlers.push(handler);
     });
 
-    vi.mocked(Server).mockImplementationOnce(() => ({
+    vi.mocked(Server).mockImplementationOnce(function() { return {
       setRequestHandler: mockSetRequestHandler,
-      connect: vi.fn().mockResolvedValue(undefined),
-    }) as any);
+      connect: vi.fn(() => {}).mockResolvedValue(undefined),
+    } as any; });
 
-    vi.mocked(StdioServerTransport).mockImplementationOnce(() => ({}) as any);
+    vi.mocked(StdioServerTransport).mockImplementationOnce(function() { return {} as any; });
     vi.spyOn(console, 'error').mockImplementation(() => {});
 
     // Mock fetch to throw a non-Error object
@@ -815,13 +819,13 @@ describe('Runtime validation with invalid configuration', () => {
     const originalEnv = process.env.CODECOV_BASE_URL;
     process.env.CODECOV_BASE_URL = 'invalid-url';
 
-    const mockSetRequestHandler = vi.fn();
-    const mockConnect = vi.fn().mockResolvedValue(undefined);
+    const mockSetRequestHandler = vi.fn(() => {});
+    const mockConnect = vi.fn(() => {}).mockResolvedValue(undefined);
 
-    vi.mocked(Server).mockImplementationOnce(() => ({
+    vi.mocked(Server).mockImplementationOnce(function() { return {
       setRequestHandler: mockSetRequestHandler,
       connect: mockConnect,
-    }) as any);
+    } as any; });
 
     // Should not throw
     await main();
@@ -837,12 +841,12 @@ describe('Runtime validation with invalid configuration', () => {
     process.env.CODECOV_BASE_URL = 'invalid-url';
 
     const handlers: any[] = [];
-    vi.mocked(Server).mockImplementationOnce(() => ({
+    vi.mocked(Server).mockImplementationOnce(function() { return {
       setRequestHandler: vi.fn((schema: any, handler: any) => {
         handlers.push(handler);
       }),
-      connect: vi.fn().mockResolvedValue(undefined),
-    }) as any);
+      connect: vi.fn(() => {}).mockResolvedValue(undefined),
+    } as any; });
 
     await main();
 
@@ -902,12 +906,12 @@ describe('Prompts handlers', () => {
       handlers.push(handler);
     });
 
-    vi.mocked(Server).mockImplementationOnce(() => ({
+    vi.mocked(Server).mockImplementationOnce(function() { return {
       setRequestHandler: mockSetRequestHandler,
-      connect: vi.fn().mockResolvedValue(undefined),
-    }) as any);
+      connect: vi.fn(() => {}).mockResolvedValue(undefined),
+    } as any; });
 
-    vi.mocked(StdioServerTransport).mockImplementationOnce(() => ({}) as any);
+    vi.mocked(StdioServerTransport).mockImplementationOnce(function() { return {} as any; });
     vi.spyOn(console, 'error').mockImplementation(() => {});
 
     await main();
@@ -929,12 +933,12 @@ describe('Prompts handlers', () => {
       handlers.push(handler);
     });
 
-    vi.mocked(Server).mockImplementationOnce(() => ({
+    vi.mocked(Server).mockImplementationOnce(function() { return {
       setRequestHandler: mockSetRequestHandler,
-      connect: vi.fn().mockResolvedValue(undefined),
-    }) as any);
+      connect: vi.fn(() => {}).mockResolvedValue(undefined),
+    } as any; });
 
-    vi.mocked(StdioServerTransport).mockImplementationOnce(() => ({}) as any);
+    vi.mocked(StdioServerTransport).mockImplementationOnce(function() { return {} as any; });
     vi.spyOn(console, 'error').mockImplementation(() => {});
 
     await main();
@@ -965,12 +969,12 @@ describe('Prompts handlers', () => {
       handlers.push(handler);
     });
 
-    vi.mocked(Server).mockImplementationOnce(() => ({
+    vi.mocked(Server).mockImplementationOnce(function() { return {
       setRequestHandler: mockSetRequestHandler,
-      connect: vi.fn().mockResolvedValue(undefined),
-    }) as any);
+      connect: vi.fn(() => {}).mockResolvedValue(undefined),
+    } as any; });
 
-    vi.mocked(StdioServerTransport).mockImplementationOnce(() => ({}) as any);
+    vi.mocked(StdioServerTransport).mockImplementationOnce(function() { return {} as any; });
     vi.spyOn(console, 'error').mockImplementation(() => {});
 
     await main();
@@ -999,12 +1003,12 @@ describe('Prompts handlers', () => {
       handlers.push(handler);
     });
 
-    vi.mocked(Server).mockImplementationOnce(() => ({
+    vi.mocked(Server).mockImplementationOnce(function() { return {
       setRequestHandler: mockSetRequestHandler,
-      connect: vi.fn().mockResolvedValue(undefined),
-    }) as any);
+      connect: vi.fn(() => {}).mockResolvedValue(undefined),
+    } as any; });
 
-    vi.mocked(StdioServerTransport).mockImplementationOnce(() => ({}) as any);
+    vi.mocked(StdioServerTransport).mockImplementationOnce(function() { return {} as any; });
     vi.spyOn(console, 'error').mockImplementation(() => {});
 
     await main();
@@ -1031,12 +1035,12 @@ describe('Prompts handlers', () => {
       handlers.push(handler);
     });
 
-    vi.mocked(Server).mockImplementationOnce(() => ({
+    vi.mocked(Server).mockImplementationOnce(function() { return {
       setRequestHandler: mockSetRequestHandler,
-      connect: vi.fn().mockResolvedValue(undefined),
-    }) as any);
+      connect: vi.fn(() => {}).mockResolvedValue(undefined),
+    } as any; });
 
-    vi.mocked(StdioServerTransport).mockImplementationOnce(() => ({}) as any);
+    vi.mocked(StdioServerTransport).mockImplementationOnce(function() { return {} as any; });
     vi.spyOn(console, 'error').mockImplementation(() => {});
 
     await main();
@@ -1057,12 +1061,12 @@ describe('Prompts handlers', () => {
       handlers.push(handler);
     });
 
-    vi.mocked(Server).mockImplementationOnce(() => ({
+    vi.mocked(Server).mockImplementationOnce(function() { return {
       setRequestHandler: mockSetRequestHandler,
-      connect: vi.fn().mockResolvedValue(undefined),
-    }) as any);
+      connect: vi.fn(() => {}).mockResolvedValue(undefined),
+    } as any; });
 
-    vi.mocked(StdioServerTransport).mockImplementationOnce(() => ({}) as any);
+    vi.mocked(StdioServerTransport).mockImplementationOnce(function() { return {} as any; });
     vi.spyOn(console, 'error').mockImplementation(() => {});
 
     await main();
@@ -1088,12 +1092,12 @@ describe('Resources handlers', () => {
       handlers.push(handler);
     });
 
-    vi.mocked(Server).mockImplementationOnce(() => ({
+    vi.mocked(Server).mockImplementationOnce(function() { return {
       setRequestHandler: mockSetRequestHandler,
-      connect: vi.fn().mockResolvedValue(undefined),
-    }) as any);
+      connect: vi.fn(() => {}).mockResolvedValue(undefined),
+    } as any; });
 
-    vi.mocked(StdioServerTransport).mockImplementationOnce(() => ({}) as any);
+    vi.mocked(StdioServerTransport).mockImplementationOnce(function() { return {} as any; });
     vi.spyOn(console, 'error').mockImplementation(() => {});
 
     await main();
@@ -1115,12 +1119,12 @@ describe('Resources handlers', () => {
       handlers.push(handler);
     });
 
-    vi.mocked(Server).mockImplementationOnce(() => ({
+    vi.mocked(Server).mockImplementationOnce(function() { return {
       setRequestHandler: mockSetRequestHandler,
-      connect: vi.fn().mockResolvedValue(undefined),
-    }) as any);
+      connect: vi.fn(() => {}).mockResolvedValue(undefined),
+    } as any; });
 
-    vi.mocked(StdioServerTransport).mockImplementationOnce(() => ({}) as any);
+    vi.mocked(StdioServerTransport).mockImplementationOnce(function() { return {} as any; });
     vi.spyOn(console, 'error').mockImplementation(() => {});
 
     await main();
@@ -1145,12 +1149,12 @@ describe('Resources handlers', () => {
       handlers.push(handler);
     });
 
-    vi.mocked(Server).mockImplementationOnce(() => ({
+    vi.mocked(Server).mockImplementationOnce(function() { return {
       setRequestHandler: mockSetRequestHandler,
-      connect: vi.fn().mockResolvedValue(undefined),
-    }) as any);
+      connect: vi.fn(() => {}).mockResolvedValue(undefined),
+    } as any; });
 
-    vi.mocked(StdioServerTransport).mockImplementationOnce(() => ({}) as any);
+    vi.mocked(StdioServerTransport).mockImplementationOnce(function() { return {} as any; });
     vi.spyOn(console, 'error').mockImplementation(() => {});
 
     await main();
@@ -1172,12 +1176,12 @@ describe('Resources handlers', () => {
       handlers.push(handler);
     });
 
-    vi.mocked(Server).mockImplementationOnce(() => ({
+    vi.mocked(Server).mockImplementationOnce(function() { return {
       setRequestHandler: mockSetRequestHandler,
-      connect: vi.fn().mockResolvedValue(undefined),
-    }) as any);
+      connect: vi.fn(() => {}).mockResolvedValue(undefined),
+    } as any; });
 
-    vi.mocked(StdioServerTransport).mockImplementationOnce(() => ({}) as any);
+    vi.mocked(StdioServerTransport).mockImplementationOnce(function() { return {} as any; });
     vi.spyOn(console, 'error').mockImplementation(() => {});
 
     await main();
@@ -1199,12 +1203,12 @@ describe('Resources handlers', () => {
       handlers.push(handler);
     });
 
-    vi.mocked(Server).mockImplementationOnce(() => ({
+    vi.mocked(Server).mockImplementationOnce(function() { return {
       setRequestHandler: mockSetRequestHandler,
-      connect: vi.fn().mockResolvedValue(undefined),
-    }) as any);
+      connect: vi.fn(() => {}).mockResolvedValue(undefined),
+    } as any; });
 
-    vi.mocked(StdioServerTransport).mockImplementationOnce(() => ({}) as any);
+    vi.mocked(StdioServerTransport).mockImplementationOnce(function() { return {} as any; });
     vi.spyOn(console, 'error').mockImplementation(() => {});
 
     await main();
@@ -1227,12 +1231,12 @@ describe('Resources handlers', () => {
       handlers.push(handler);
     });
 
-    vi.mocked(Server).mockImplementationOnce(() => ({
+    vi.mocked(Server).mockImplementationOnce(function() { return {
       setRequestHandler: mockSetRequestHandler,
-      connect: vi.fn().mockResolvedValue(undefined),
-    }) as any);
+      connect: vi.fn(() => {}).mockResolvedValue(undefined),
+    } as any; });
 
-    vi.mocked(StdioServerTransport).mockImplementationOnce(() => ({}) as any);
+    vi.mocked(StdioServerTransport).mockImplementationOnce(function() { return {} as any; });
     vi.spyOn(console, 'error').mockImplementation(() => {});
 
     await main();
