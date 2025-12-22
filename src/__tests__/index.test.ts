@@ -15,7 +15,7 @@ vi.mock('@modelcontextprotocol/sdk/server/stdio.js', () => ({
 }));
 
 // Now import the code under test
-import { getConfig, CodecovClient, type CodecovConfig, main, handleMainError, runMainIfDirect } from '../index.js';
+import { getConfig, CodecovClient, type CodecovConfig, main, handleMainError, runMainIfDirect, logConfigurationWarnings } from '../index.js';
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 
@@ -860,5 +860,389 @@ describe('Runtime validation with invalid configuration', () => {
     expect(result.content[0].text).toContain('CODECOV_BASE_URL');
 
     process.env.CODECOV_BASE_URL = originalEnv;
+  });
+});
+
+describe('logConfigurationWarnings', () => {
+  it('warns when CODECOV_BASE_URL does not start with http:// or https://', () => {
+    const originalEnv = process.env.CODECOV_BASE_URL;
+    process.env.CODECOV_BASE_URL = 'invalid-url';
+
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    logConfigurationWarnings();
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith('WARNING: CODECOV_BASE_URL must start with http:// or https://');
+    expect(consoleErrorSpy).toHaveBeenCalledWith('Received: invalid-url');
+    expect(consoleErrorSpy).toHaveBeenCalledWith('Tools will fail at execution time if this URL is invalid.');
+
+    consoleErrorSpy.mockRestore();
+    process.env.CODECOV_BASE_URL = originalEnv;
+  });
+
+  it('warns when CODECOV_BASE_URL uses insecure HTTP', () => {
+    const originalEnv = process.env.CODECOV_BASE_URL;
+    process.env.CODECOV_BASE_URL = 'http://codecov.example.com';
+
+    const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    logConfigurationWarnings();
+
+    expect(consoleWarnSpy).toHaveBeenCalledWith('WARNING: Using insecure HTTP connection. Consider using HTTPS.');
+
+    consoleWarnSpy.mockRestore();
+    process.env.CODECOV_BASE_URL = originalEnv;
+  });
+});
+
+describe('Prompts handlers', () => {
+  it('handles ListPromptsRequestSchema', async () => {
+    const handlers: any[] = [];
+    const mockSetRequestHandler = vi.fn((schema, handler) => {
+      handlers.push(handler);
+    });
+
+    vi.mocked(Server).mockImplementationOnce(() => ({
+      setRequestHandler: mockSetRequestHandler,
+      connect: vi.fn().mockResolvedValue(undefined),
+    }) as any);
+
+    vi.mocked(StdioServerTransport).mockImplementationOnce(() => ({}) as any);
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    await main();
+
+    // Third handler is ListPrompts (after ListTools and CallTool)
+    const listPromptsHandler = handlers[2];
+    const result = await listPromptsHandler();
+
+    expect(result).toHaveProperty('prompts');
+    expect(result.prompts).toBeInstanceOf(Array);
+    expect(result.prompts.length).toBeGreaterThan(0);
+    expect(result.prompts[0]).toHaveProperty('name');
+    expect(result.prompts[0]).toHaveProperty('title');
+  });
+
+  it('handles GetPromptRequestSchema for analyze_coverage', async () => {
+    const handlers: any[] = [];
+    const mockSetRequestHandler = vi.fn((schema, handler) => {
+      handlers.push(handler);
+    });
+
+    vi.mocked(Server).mockImplementationOnce(() => ({
+      setRequestHandler: mockSetRequestHandler,
+      connect: vi.fn().mockResolvedValue(undefined),
+    }) as any);
+
+    vi.mocked(StdioServerTransport).mockImplementationOnce(() => ({}) as any);
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    await main();
+
+    // Fourth handler is GetPrompt
+    const getPromptHandler = handlers[3];
+    const result = await getPromptHandler({
+      params: {
+        name: 'analyze_coverage',
+        arguments: {
+          owner: 'test-owner',
+          repo: 'test-repo',
+          branch: 'main'
+        }
+      }
+    });
+
+    expect(result).toHaveProperty('messages');
+    expect(result.messages).toBeInstanceOf(Array);
+    expect(result.messages[0]).toHaveProperty('role', 'user');
+    expect(result.messages[0].content.text).toContain('test-owner/test-repo');
+    expect(result.messages[0].content.text).toContain('main');
+  });
+
+  it('handles GetPromptRequestSchema for compare_commits', async () => {
+    const handlers: any[] = [];
+    const mockSetRequestHandler = vi.fn((schema, handler) => {
+      handlers.push(handler);
+    });
+
+    vi.mocked(Server).mockImplementationOnce(() => ({
+      setRequestHandler: mockSetRequestHandler,
+      connect: vi.fn().mockResolvedValue(undefined),
+    }) as any);
+
+    vi.mocked(StdioServerTransport).mockImplementationOnce(() => ({}) as any);
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    await main();
+
+    const getPromptHandler = handlers[3];
+    const result = await getPromptHandler({
+      params: {
+        name: 'compare_commits',
+        arguments: {
+          owner: 'test-owner',
+          repo: 'test-repo',
+          base_commit: 'abc123',
+          head_commit: 'def456'
+        }
+      }
+    });
+
+    expect(result).toHaveProperty('messages');
+    expect(result.messages[0].content.text).toContain('abc123');
+    expect(result.messages[0].content.text).toContain('def456');
+  });
+
+  it('handles GetPromptRequestSchema for find_low_coverage', async () => {
+    const handlers: any[] = [];
+    const mockSetRequestHandler = vi.fn((schema, handler) => {
+      handlers.push(handler);
+    });
+
+    vi.mocked(Server).mockImplementationOnce(() => ({
+      setRequestHandler: mockSetRequestHandler,
+      connect: vi.fn().mockResolvedValue(undefined),
+    }) as any);
+
+    vi.mocked(StdioServerTransport).mockImplementationOnce(() => ({}) as any);
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    await main();
+
+    const getPromptHandler = handlers[3];
+    const result = await getPromptHandler({
+      params: {
+        name: 'find_low_coverage',
+        arguments: {
+          owner: 'test-owner',
+          repo: 'test-repo',
+          threshold: 75
+        }
+      }
+    });
+
+    expect(result).toHaveProperty('messages');
+    expect(result.messages[0].content.text).toContain('75');
+  });
+
+  it('throws error when arguments are missing for GetPromptRequestSchema', async () => {
+    const handlers: any[] = [];
+    const mockSetRequestHandler = vi.fn((schema, handler) => {
+      handlers.push(handler);
+    });
+
+    vi.mocked(Server).mockImplementationOnce(() => ({
+      setRequestHandler: mockSetRequestHandler,
+      connect: vi.fn().mockResolvedValue(undefined),
+    }) as any);
+
+    vi.mocked(StdioServerTransport).mockImplementationOnce(() => ({}) as any);
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    await main();
+
+    const getPromptHandler = handlers[3];
+
+    await expect(getPromptHandler({
+      params: {
+        name: 'analyze_coverage'
+        // No arguments provided
+      }
+    })).rejects.toThrow('Arguments required for prompt: analyze_coverage');
+  });
+
+  it('throws error for unknown prompt name', async () => {
+    const handlers: any[] = [];
+    const mockSetRequestHandler = vi.fn((schema, handler) => {
+      handlers.push(handler);
+    });
+
+    vi.mocked(Server).mockImplementationOnce(() => ({
+      setRequestHandler: mockSetRequestHandler,
+      connect: vi.fn().mockResolvedValue(undefined),
+    }) as any);
+
+    vi.mocked(StdioServerTransport).mockImplementationOnce(() => ({}) as any);
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    await main();
+
+    const getPromptHandler = handlers[3];
+
+    await expect(getPromptHandler({
+      params: {
+        name: 'unknown_prompt',
+        arguments: {
+          owner: 'test',
+          repo: 'test'
+        }
+      }
+    })).rejects.toThrow('Unknown prompt: unknown_prompt');
+  });
+});
+
+describe('Resources handlers', () => {
+  it('handles ListResourcesRequestSchema', async () => {
+    const handlers: any[] = [];
+    const mockSetRequestHandler = vi.fn((schema, handler) => {
+      handlers.push(handler);
+    });
+
+    vi.mocked(Server).mockImplementationOnce(() => ({
+      setRequestHandler: mockSetRequestHandler,
+      connect: vi.fn().mockResolvedValue(undefined),
+    }) as any);
+
+    vi.mocked(StdioServerTransport).mockImplementationOnce(() => ({}) as any);
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    await main();
+
+    // Fifth handler is ListResources
+    const listResourcesHandler = handlers[4];
+    const result = await listResourcesHandler();
+
+    expect(result).toHaveProperty('resources');
+    expect(result.resources).toBeInstanceOf(Array);
+    expect(result.resources.length).toBeGreaterThan(0);
+    expect(result.resources[0]).toHaveProperty('uri');
+    expect(result.resources[0]).toHaveProperty('name');
+  });
+
+  it('handles ReadResourceRequestSchema for getting-started', async () => {
+    const handlers: any[] = [];
+    const mockSetRequestHandler = vi.fn((schema, handler) => {
+      handlers.push(handler);
+    });
+
+    vi.mocked(Server).mockImplementationOnce(() => ({
+      setRequestHandler: mockSetRequestHandler,
+      connect: vi.fn().mockResolvedValue(undefined),
+    }) as any);
+
+    vi.mocked(StdioServerTransport).mockImplementationOnce(() => ({}) as any);
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    await main();
+
+    // Sixth handler is ReadResource
+    const readResourceHandler = handlers[5];
+    const result = await readResourceHandler({
+      params: {
+        uri: 'codecov://docs/getting-started'
+      }
+    });
+
+    expect(result).toHaveProperty('contents');
+    expect(result.contents[0]).toHaveProperty('uri', 'codecov://docs/getting-started');
+    expect(result.contents[0]).toHaveProperty('mimeType', 'text/markdown');
+    expect(result.contents[0].text).toContain('Getting Started');
+  });
+
+  it('handles ReadResourceRequestSchema for github-actions', async () => {
+    const handlers: any[] = [];
+    const mockSetRequestHandler = vi.fn((schema, handler) => {
+      handlers.push(handler);
+    });
+
+    vi.mocked(Server).mockImplementationOnce(() => ({
+      setRequestHandler: mockSetRequestHandler,
+      connect: vi.fn().mockResolvedValue(undefined),
+    }) as any);
+
+    vi.mocked(StdioServerTransport).mockImplementationOnce(() => ({}) as any);
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    await main();
+
+    const readResourceHandler = handlers[5];
+    const result = await readResourceHandler({
+      params: {
+        uri: 'codecov://examples/github-actions'
+      }
+    });
+
+    expect(result.contents[0]).toHaveProperty('mimeType', 'text/yaml');
+    expect(result.contents[0].text).toContain('codecov/codecov-action');
+  });
+
+  it('handles ReadResourceRequestSchema for query-patterns', async () => {
+    const handlers: any[] = [];
+    const mockSetRequestHandler = vi.fn((schema, handler) => {
+      handlers.push(handler);
+    });
+
+    vi.mocked(Server).mockImplementationOnce(() => ({
+      setRequestHandler: mockSetRequestHandler,
+      connect: vi.fn().mockResolvedValue(undefined),
+    }) as any);
+
+    vi.mocked(StdioServerTransport).mockImplementationOnce(() => ({}) as any);
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    await main();
+
+    const readResourceHandler = handlers[5];
+    const result = await readResourceHandler({
+      params: {
+        uri: 'codecov://examples/query-patterns'
+      }
+    });
+
+    expect(result.contents[0]).toHaveProperty('mimeType', 'text/markdown');
+    expect(result.contents[0].text).toContain('Common Codecov Query Patterns');
+  });
+
+  it('handles ReadResourceRequestSchema for configuration', async () => {
+    const handlers: any[] = [];
+    const mockSetRequestHandler = vi.fn((schema, handler) => {
+      handlers.push(handler);
+    });
+
+    vi.mocked(Server).mockImplementationOnce(() => ({
+      setRequestHandler: mockSetRequestHandler,
+      connect: vi.fn().mockResolvedValue(undefined),
+    }) as any);
+
+    vi.mocked(StdioServerTransport).mockImplementationOnce(() => ({}) as any);
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    await main();
+
+    const readResourceHandler = handlers[5];
+    const result = await readResourceHandler({
+      params: {
+        uri: 'codecov://docs/configuration'
+      }
+    });
+
+    expect(result.contents[0]).toHaveProperty('mimeType', 'text/markdown');
+    expect(result.contents[0].text).toContain('CODECOV_BASE_URL');
+    expect(result.contents[0].text).toContain('CODECOV_TOKEN');
+  });
+
+  it('throws error for unknown resource URI', async () => {
+    const handlers: any[] = [];
+    const mockSetRequestHandler = vi.fn((schema, handler) => {
+      handlers.push(handler);
+    });
+
+    vi.mocked(Server).mockImplementationOnce(() => ({
+      setRequestHandler: mockSetRequestHandler,
+      connect: vi.fn().mockResolvedValue(undefined),
+    }) as any);
+
+    vi.mocked(StdioServerTransport).mockImplementationOnce(() => ({}) as any);
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    await main();
+
+    const readResourceHandler = handlers[5];
+
+    await expect(readResourceHandler({
+      params: {
+        uri: 'codecov://unknown/resource'
+      }
+    })).rejects.toThrow('Unknown resource: codecov://unknown/resource');
   });
 });
