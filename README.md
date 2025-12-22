@@ -69,14 +69,32 @@ Expected output: `codecov: mcp-server-codecov - ✓ Connected`
 
 ## Support This Project
 
-If you find this MCP server useful, please consider sponsoring its development:
+If you find this MCP server useful, please consider sponsoring its development. Your support helps ensure continued maintenance, timely bug fixes, and new features!
 
-- ⭐ **[Sponsor on GitHub](https://github.com/sponsors/egulatee)** - Support ongoing maintenance and new features
-- 🐛 **Report issues** - Help improve the project by reporting bugs
+### Sponsorship Tiers
+
+**💚 $5/month - Supporter**
+- Recognition in SPONSORS.md
+- Support ongoing development
+
+**🥉 $25/month - Bronze Sponsor**
+- All Supporter benefits
+- Name listed in README
+- Priority issue acknowledgment
+
+**🥈 $100/month - Silver Sponsor**
+- All Bronze benefits
+- Logo in README with link
+- Priority bug fix response (within 48 hours)
+
+**[Become a sponsor →](https://github.com/sponsors/egulatee)**
+
+### Other Ways to Help
+
+- ⭐ **Star the repository** - Show your appreciation
+- 🐛 **Report issues** - Help improve the project
 - 💡 **Feature requests** - Share ideas for new functionality
-- 📖 **Spread the word** - Star the repo and share with others
-
-Your sponsorship helps ensure continued development, timely bug fixes, and new features!
+- 📖 **Spread the word** - Share with others who might benefit
 
 ## Token Types
 
