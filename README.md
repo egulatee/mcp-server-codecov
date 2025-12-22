@@ -82,11 +82,6 @@ If you find this MCP server useful, please consider sponsoring its development. 
 - Name listed in README
 - Priority issue acknowledgment
 
-**🥈 $100/month - Silver Sponsor**
-- All Bronze benefits
-- Logo in README with link
-- Priority bug fix response (within 48 hours)
-
 **[Become a sponsor →](https://github.com/sponsors/egulatee)**
 
 ### Other Ways to Help
