@@ -15,6 +15,50 @@ A Model Context Protocol (MCP) server that provides tools for querying Codecov c
 
 📦 **Published on npm:** [mcp-server-codecov](https://www.npmjs.com/package/mcp-server-codecov)
 
+## Quick Start (Claude Code)
+
+Get started in under 2 minutes:
+
+### 1. Get your Codecov API token
+
+Create an API token (not an upload token) from your Codecov account:
+
+1. Go to [codecov.io](https://codecov.io) (or your self-hosted URL)
+2. Click your avatar → Settings → Access tab
+3. Click "Generate Token" and name it "MCP Server API Access"
+4. Copy the token value
+
+### 2. Set your environment variable
+
+Add to your shell profile (`~/.zshrc` or `~/.bashrc`):
+
+```bash
+export CODECOV_TOKEN="your-api-token-here"
+```
+
+Then reload: `source ~/.zshrc`
+
+### 3. Install the MCP server
+
+```bash
+claude mcp add --transport stdio codecov \
+  --env CODECOV_BASE_URL=https://codecov.io \
+  --env CODECOV_TOKEN=${CODECOV_TOKEN} \
+  -- npx -y mcp-server-codecov
+```
+
+### 4. Verify installation
+
+```bash
+claude mcp get codecov
+```
+
+Expected output: `codecov: mcp-server-codecov - ✓ Connected`
+
+**That's it!** You can now use Codecov tools in Claude Code. See [Available Tools](#available-tools) below.
+
+---
+
 ## Features
 
 - **File-level coverage**: Get detailed line-by-line coverage data for specific files
@@ -30,280 +74,7 @@ A Model Context Protocol (MCP) server that provides tools for querying Codecov c
 - **Upload Token**: Used for pushing coverage reports TO Codecov during CI/CD. Found on your repository's Settings → General page.
 - **API Token**: Used for reading coverage data FROM Codecov via the API. Created in your Codecov Settings → Access tab.
 
-This MCP server requires an **API token**, not an upload token. To create an API token:
-
-1. Go to your Codecov instance (e.g., `https://codecov.io` or your self-hosted URL)
-2. Click on your avatar in the top right → Settings
-3. Navigate to the "Access" tab
-4. Click "Generate Token" and name it (e.g., "MCP Server API Access")
-5. Copy the token value and use it in your configuration
-
-## Installation
-
-### Using npm (Recommended)
-
-The easiest way to use this MCP server is to install it globally via npm:
-
-```bash
-npm install -g mcp-server-codecov
-```
-
-After installation, the `mcp-server-codecov` command will be available globally and you can use it directly in your MCP configuration.
-
-**Benefits of npm installation:**
-- ✅ Simple one-command installation
-- ✅ Automatic updates with `npm update -g mcp-server-codecov`
-- ✅ No manual build steps required
-- ✅ Works across all projects
-- ✅ Recommended for production use
-
-### From Source (Development Only)
-
-Only use this method if you're contributing to the project or need to modify the source code:
-
-```bash
-git clone https://github.com/egulatee/mcp-server-codecov.git
-cd mcp-server-codecov
-npm install
-npm run build
-```
-
-**Note**: For regular usage, prefer the npm installation method above.
-
-## Configuration
-
-The server is configured through environment variables:
-
-- `CODECOV_BASE_URL` (optional): Base URL for the Codecov instance. Defaults to `https://codecov.io`
-- `CODECOV_TOKEN` (optional): Authentication token for accessing private repositories
-
-### Example Configuration for Claude Desktop
-
-Add to your Claude Desktop configuration file:
-
-**macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
-
-**Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
-
-**Using npm package (recommended):**
-```json
-{
-  "mcpServers": {
-    "codecov": {
-      "command": "npx",
-      "args": ["-y", "mcp-server-codecov"],
-      "env": {
-        "CODECOV_BASE_URL": "https://codecov.io",
-        "CODECOV_TOKEN": "your-codecov-token-here"
-      }
-    }
-  }
-}
-```
-
-<details>
-<summary>Using source installation (development only)</summary>
-
-```json
-{
-  "mcpServers": {
-    "codecov": {
-      "command": "node",
-      "args": ["/path/to/mcp-server-codecov/dist/index.js"],
-      "env": {
-        "CODECOV_BASE_URL": "https://codecov.io",
-        "CODECOV_TOKEN": "your-codecov-token-here"
-      }
-    }
-  }
-}
-```
-</details>
-
-### Example Configuration for Claude Code
-
-#### Option 1: Using CLI (Recommended)
-
-Use the Claude Code CLI to add the MCP server with the npm package:
-
-```bash
-claude mcp add --transport stdio codecov \
-  --env CODECOV_BASE_URL=https://codecov.io \
-  --env CODECOV_TOKEN=${CODECOV_TOKEN} \
-  -- npx -y mcp-server-codecov
-```
-
-This automatically configures the server in your `~/.claude.json` file.
-
-<details>
-<summary>Using CLI with source installation (development only)</summary>
-
-```bash
-cd /path/to/codecov-mcp
-npm install && npm run build
-claude mcp add --transport stdio codecov \
-  --env CODECOV_BASE_URL=https://codecov.io \
-  --env CODECOV_TOKEN=${CODECOV_TOKEN} \
-  -- node /absolute/path/to/codecov-mcp/dist/index.js
-```
-</details>
-
-#### Option 2: Manual Configuration
-
-Add to your Claude Code MCP settings file at `~/.claude.json`:
-
-**Using npm package (recommended):**
-```json
-{
-  "mcpServers": {
-    "codecov": {
-      "command": "npx",
-      "args": ["-y", "mcp-server-codecov"],
-      "env": {
-        "CODECOV_BASE_URL": "https://codecov.io",
-        "CODECOV_TOKEN": "${CODECOV_TOKEN}"
-      }
-    }
-  }
-}
-```
-
-<details>
-<summary>Using source installation (development only)</summary>
-
-```json
-{
-  "mcpServers": {
-    "codecov": {
-      "command": "node",
-      "args": ["/absolute/path/to/codecov-mcp/dist/index.js"],
-      "env": {
-        "CODECOV_BASE_URL": "https://codecov.io",
-        "CODECOV_TOKEN": "${CODECOV_TOKEN}"
-      }
-    }
-  }
-}
-```
-</details>
-
-**Notes**:
-- Environment variable expansion is supported using `${VAR}` syntax
-- Variables like `${CODECOV_TOKEN}` will be read from your shell environment (e.g., from `~/.zshrc` or `~/.bashrc`)
-- The `-y` flag for npx automatically accepts the package installation prompt
-
-### Self-Hosted Codecov
-
-For self-hosted Codecov instances, simply set the `CODECOV_BASE_URL` environment variable to your instance URL.
-
-**Claude Desktop:**
-```json
-{
-  "mcpServers": {
-    "codecov": {
-      "command": "npx",
-      "args": ["-y", "mcp-server-codecov"],
-      "env": {
-        "CODECOV_BASE_URL": "https://codecov.your-company.com",
-        "CODECOV_TOKEN": "your-codecov-token-here"
-      }
-    }
-  }
-}
-```
-
-**Claude Code CLI:**
-```bash
-claude mcp add --transport stdio codecov \
-  --env CODECOV_BASE_URL=https://codecov.your-company.com \
-  --env CODECOV_TOKEN=${CODECOV_TOKEN} \
-  -- npx -y mcp-server-codecov
-```
-
-**Claude Code Manual (`~/.claude.json`):**
-```json
-{
-  "mcpServers": {
-    "codecov": {
-      "command": "npx",
-      "args": ["-y", "mcp-server-codecov"],
-      "env": {
-        "CODECOV_BASE_URL": "https://codecov.your-company.com",
-        "CODECOV_TOKEN": "${CODECOV_TOKEN}"
-      }
-    }
-  }
-}
-```
-
-## Verification and Troubleshooting
-
-### Verify npm Installation
-
-After installing via npm, verify the package is correctly installed:
-
-```bash
-# Check installed version
-npm list -g mcp-server-codecov
-
-# Verify command is accessible
-which mcp-server-codecov
-
-# Test the package info
-npm view mcp-server-codecov version
-```
-
-### Verify MCP Server Configuration
-
-After configuring the MCP server, verify it's working correctly:
-
-```bash
-# List all configured MCP servers
-claude mcp list
-
-# Check the codecov server status
-claude mcp get codecov
-```
-
-**Expected output for npm installation:**
-```
-codecov: mcp-server-codecov - ✓ Connected
-```
-
-**Troubleshooting connection issues:**
-- If you see "Failed to connect", restart Claude Code or Claude Desktop
-- Verify environment variables are set correctly: `echo $CODECOV_TOKEN`
-- Check the configuration: `claude mcp get codecov`
-
-### Common Issues
-
-**1. 401 Unauthorized Error**
-
-If you get a `401 Unauthorized` error when using the tools:
-- **Check token type**: Ensure you're using an **API token** (from Settings → Access), not an upload token
-- Ensure `CODECOV_TOKEN` is set in the MCP server's `env` section
-- Verify the token is valid and has access to the repository
-- For self-hosted instances, confirm you're using the correct `CODECOV_BASE_URL`
-
-**2. Environment Variable Not Expanding**
-
-If `${CODECOV_TOKEN}` isn't being replaced:
-- Make sure the variable is exported in your shell (check `~/.zshrc` or `~/.bashrc`)
-- Restart Claude Code after setting environment variables
-- Verify the variable exists: `echo $CODECOV_TOKEN`
-
-**3. HTTP vs HTTPS**
-
-Always use `https://` for the `CODECOV_BASE_URL`, not `http://`:
-- Correct: `https://your-codecov-instance.com`
-- Incorrect: `http://your-codecov-instance.com`
-
-**4. Connection Failed**
-
-If the server shows as not connected:
-- Check that the path to `dist/index.js` is correct and absolute
-- Ensure the server is built: `npm run build`
-- Check Claude Code logs for error details
+This MCP server requires an **API token**, not an upload token.
 
 ## Available Tools
 
@@ -348,6 +119,166 @@ Get overall coverage statistics for a repository.
 **Example:**
 ```
 Get overall coverage for owner/repo on main branch
+```
+
+## Verification and Troubleshooting
+
+### Common Issues
+
+**1. 401 Unauthorized Error**
+
+- **Check token type**: Ensure you're using an **API token** (from Settings → Access), not an upload token
+- Verify the token is valid and has access to the repository
+- For self-hosted instances, confirm you're using the correct `CODECOV_BASE_URL`
+
+**2. Environment Variable Not Expanding**
+
+- Make sure the variable is exported in your shell (check `~/.zshrc` or `~/.bashrc`)
+- Restart Claude Code after setting environment variables
+- Verify the variable exists: `echo $CODECOV_TOKEN`
+
+**3. Connection Failed**
+
+- Restart Claude Code or Claude Desktop
+- Verify environment variables are set correctly: `echo $CODECOV_TOKEN`
+- Check the configuration: `claude mcp get codecov`
+
+**4. HTTP vs HTTPS**
+
+Always use `https://` for the `CODECOV_BASE_URL`, not `http://`:
+- Correct: `https://your-codecov-instance.com`
+- Incorrect: `http://your-codecov-instance.com`
+
+## Advanced Configuration
+
+### Self-Hosted Codecov
+
+For self-hosted Codecov instances, use your instance URL:
+
+```bash
+claude mcp add --transport stdio codecov \
+  --env CODECOV_BASE_URL=https://codecov.your-company.com \
+  --env CODECOV_TOKEN=${CODECOV_TOKEN} \
+  -- npx -y mcp-server-codecov
+```
+
+### Claude Desktop Setup
+
+Add to your Claude Desktop configuration file:
+
+**macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+
+**Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "codecov": {
+      "command": "npx",
+      "args": ["-y", "mcp-server-codecov"],
+      "env": {
+        "CODECOV_BASE_URL": "https://codecov.io",
+        "CODECOV_TOKEN": "your-codecov-token-here"
+      }
+    }
+  }
+}
+```
+
+### Manual Configuration (Claude Code)
+
+Add to `~/.claude.json`:
+
+```json
+{
+  "mcpServers": {
+    "codecov": {
+      "command": "npx",
+      "args": ["-y", "mcp-server-codecov"],
+      "env": {
+        "CODECOV_BASE_URL": "https://codecov.io",
+        "CODECOV_TOKEN": "${CODECOV_TOKEN}"
+      }
+    }
+  }
+}
+```
+
+**Notes**:
+- Environment variable expansion is supported using `${VAR}` syntax
+- Variables like `${CODECOV_TOKEN}` will be read from your shell environment
+- The `-y` flag for npx automatically accepts the package installation prompt
+
+### Installing from npm Globally
+
+```bash
+npm install -g mcp-server-codecov
+```
+
+**Benefits:**
+- Simple one-command installation
+- Automatic updates with `npm update -g mcp-server-codecov`
+- No manual build steps required
+- Works across all projects
+
+**Verify installation:**
+```bash
+npm list -g mcp-server-codecov
+which mcp-server-codecov
+npm view mcp-server-codecov version
+```
+
+### Development Installation (Source)
+
+Only use this method if you're contributing to the project:
+
+```bash
+git clone https://github.com/egulatee/mcp-server-codecov.git
+cd mcp-server-codecov
+npm install
+npm run build
+```
+
+Then configure with the built path:
+
+**Claude Code CLI:**
+```bash
+claude mcp add --transport stdio codecov \
+  --env CODECOV_BASE_URL=https://codecov.io \
+  --env CODECOV_TOKEN=${CODECOV_TOKEN} \
+  -- node /absolute/path/to/codecov-mcp/dist/index.js
+```
+
+**Manual (`~/.claude.json`):**
+```json
+{
+  "mcpServers": {
+    "codecov": {
+      "command": "node",
+      "args": ["/absolute/path/to/codecov-mcp/dist/index.js"],
+      "env": {
+        "CODECOV_BASE_URL": "https://codecov.io",
+        "CODECOV_TOKEN": "${CODECOV_TOKEN}"
+      }
+    }
+  }
+}
+```
+
+**Claude Desktop:**
+```json
+{
+  "mcpServers": {
+    "codecov": {
+      "command": "node",
+      "args": ["/path/to/mcp-server-codecov/dist/index.js"],
+      "env": {
+        "CODECOV_BASE_URL": "https://codecov.io",
+        "CODECOV_TOKEN": "your-codecov-token-here"
+      }
+    }
+  }
+}
 ```
 
 ## Testing
