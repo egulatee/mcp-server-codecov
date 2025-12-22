@@ -67,6 +67,17 @@ Expected output: `codecov: mcp-server-codecov - ✓ Connected`
 - **Configurable URL**: Point to any Codecov instance (codecov.io or self-hosted)
 - **Token authentication**: API token support for accessing coverage data
 
+## Support This Project
+
+If you find this MCP server useful, please consider sponsoring its development:
+
+- ⭐ **[Sponsor on GitHub](https://github.com/sponsors/egulatee)** - Support ongoing maintenance and new features
+- 🐛 **Report issues** - Help improve the project by reporting bugs
+- 💡 **Feature requests** - Share ideas for new functionality
+- 📖 **Spread the word** - Star the repo and share with others
+
+Your sponsorship helps ensure continued development, timely bug fixes, and new features!
+
 ## Token Types
 
 **Important**: Codecov has two different types of tokens:

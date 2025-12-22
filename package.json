@@ -52,6 +52,10 @@
     "url": "https://github.com/egulatee"
   },
   "license": "MIT",
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/egulatee"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/egulatee/mcp-server-codecov.git"
