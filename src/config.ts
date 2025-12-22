@@ -53,6 +53,6 @@ export function getPackageVersion(): string {
     return packageJson.version;
   } catch (error) {
     console.error('Warning: Could not read version from package.json');
-    return '1.0.4'; // Fallback to current version
+    return '1.1.0'; // Fallback to current version
   }
 }
