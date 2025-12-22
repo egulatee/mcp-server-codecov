@@ -10,6 +10,10 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: read
+      actions: write
+
     strategy:
       matrix:
         node-version: [20.x, 22.x]
