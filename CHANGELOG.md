@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2025-12-21
+
+### Changed
+- **Modularized Codebase** - Refactored monolithic `src/index.ts` (693 lines) into focused modules (#60)
+  - `types.ts` (11 lines): Shared TypeScript interfaces
+  - `config.ts` (58 lines): Configuration and validation logic
+  - `client.ts` (48 lines): CodecovClient API class
+  - `tools.ts` (171 lines): Tool definitions and handlers
+  - `prompts.ts` (169 lines): Prompt definitions and handlers
+  - `resources.ts` (182 lines): Resource definitions and inline content
+  - `server.ts` (73 lines): MCP server initialization and wiring
+  - `index.ts` (57 lines): Clean entry point with re-exports
+- Maintained 100% backward compatibility with all public APIs
+- All 69 tests passing with 95.49% code coverage
+
+### Added
+- Professional module structure for better code organization
+- Clear separation of concerns across modules
+- Improved maintainability for future development
+
+### Impact
+- Better code navigation and readability
+- Easier for contributors to understand and modify specific components
+- Publication-ready codebase structure
+
 ## [1.0.4] - 2025-12-21
 
 ### Added
@@ -103,6 +128,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Comprehensive test suite with 97%+ code coverage
 - Published to npm registry as `mcp-server-codecov`
 
+[1.1.0]: https://github.com/egulatee/mcp-server-codecov/compare/v1.0.4...v1.1.0
+[1.0.4]: https://github.com/egulatee/mcp-server-codecov/compare/v1.0.3...v1.0.4
 [1.0.3]: https://github.com/egulatee/mcp-server-codecov/compare/v1.0.2...v1.0.3
 [1.0.2]: https://github.com/egulatee/mcp-server-codecov/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/egulatee/mcp-server-codecov/compare/v1.0.0...v1.0.1
