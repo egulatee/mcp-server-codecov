@@ -6,7 +6,7 @@
 ![Test and Coverage](https://github.com/egulatee/mcp-server-codecov/workflows/Test%20and%20Coverage/badge.svg)
 [![Security Policy](https://img.shields.io/badge/Security-Policy-blue.svg)](https://github.com/egulatee/mcp-server-codecov/security/policy)
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-![Node.js Version](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen)
+![Node.js Version](https://img.shields.io/badge/node-%3E%3D20.0.0-brightgreen)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.7+-blue.svg)
 ![MCP](https://img.shields.io/badge/MCP-Server-orange.svg)
 [![MCP Badge](https://lobehub.com/badge/mcp/egulatee-mcp-server-codecov)](https://lobehub.com/mcp/egulatee-mcp-server-codecov)
@@ -386,7 +386,7 @@ Coverage reports are automatically generated in the `coverage/` directory after 
 Tests run automatically on:
 - Every push to `main` and `develop` branches
 - Every pull request targeting `main` or `develop`
-- Multiple Node.js versions (18.x, 20.x, 22.x)
+- Multiple Node.js versions (20.x, 22.x)
 
 Coverage reports are uploaded to Codecov, and PR comments show coverage changes for each pull request.
 
