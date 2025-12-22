@@ -80,7 +80,7 @@ npm run build
 ### 4. Required Tools
 
 - **Git** (v2.0+)
-- **Node.js** (v18.0.0+)
+- **Node.js** (v20.0.0+)
 - **npm** (v9.0+)
 - **GitHub CLI** (`gh`) - For creating releases and managing issues
 
@@ -583,7 +583,7 @@ cat tsconfig.json
 3. **Check Node.js version compatibility:**
    ```bash
    node --version
-   # Must be >= 18.0.0 (check engines in package.json)
+   # Must be >= 20.0.0 (check engines in package.json)
    ```
 
 ### Issue 7: Network/Timeout Errors
@@ -1338,7 +1338,7 @@ npm uninstall -g mcp-server-codecov
 - Fixed symlink resolution bug preventing npx execution (#28)
   - Added realpathSync() to resolve npm bin symlinks
   - Now works with npx, npm bin, and direct execution
-  - Tested across Node.js v18, v20, and v22
+  - Tested across Node.js v20 and v22
 
 ### Changed
 - Updated README configuration examples to use npx pattern
