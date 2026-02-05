@@ -11,11 +11,11 @@
 ![MCP](https://img.shields.io/badge/MCP-Server-orange.svg)
 [![MCP Badge](https://lobehub.com/badge/mcp/egulatee-mcp-server-codecov)](https://lobehub.com/mcp/egulatee-mcp-server-codecov)
 
-A Model Context Protocol (MCP) server that provides tools for querying Codecov coverage data. Built with [AI-augmented development](https://www.aiaugmentedsoftwaredevelopment.com/). Supports both codecov.io and self-hosted Codecov instances with configurable URL endpoints.
+A Model Context Protocol (MCP) server that provides tools for querying Codecov coverage data. Supports both codecov.io and self-hosted Codecov instances with configurable URL endpoints.
 
 📦 **Published on npm:** [mcp-server-codecov](https://www.npmjs.com/package/mcp-server-codecov)
 
-> **📖 Learn More**: Read about [building this MCP server with AI in just 2 hours](https://blog.aiaugmentedsoftwaredevelopment.com/posts/building-codecov-mcp-server-in-2-hours/) on our blog about [AI-augmented software development](https://www.aiaugmentedsoftwaredevelopment.com/).
+> **📖 Learn More**: Read about [building this MCP server with AI in just 2 hours](https://blog.aiaugmentedsoftwaredevelopment.com/posts/building-codecov-mcp-server-in-2-hours/).
 
 ## Quick Start (Claude Code)
 
@@ -318,10 +318,9 @@ This server uses Codecov's API v2. The API endpoints follow this pattern:
 
 Currently supports GitHub repositories (`gh`). Support for other providers (GitLab, Bitbucket) can be added by modifying the API paths.
 
-## Resources & Community
+## Resources
 
 - 📝 [Building the Codecov MCP Server in 2 Hours](https://blog.aiaugmentedsoftwaredevelopment.com/posts/building-codecov-mcp-server-in-2-hours/) - A detailed walkthrough of developing this server using AI-augmented development techniques
-- 🌐 [AI Augmented Software Development](https://www.aiaugmentedsoftwaredevelopment.com/) - Explore more about building software with AI assistance
 
 ## License
 
