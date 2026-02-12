@@ -445,6 +445,131 @@ describe('CodecovClient', () => {
         .toThrow('Codecov API error: 401 Error');
     });
   });
+
+  describe('getPullRequestCoverage', () => {
+    it('fetches pull request coverage with valid params', async () => {
+      const mockData = {
+        coverage: 88.5,
+        head: { commit_sha: 'abc123' },
+        base: { commit_sha: 'def456' }
+      };
+      vi.mocked(global.fetch).mockResolvedValueOnce(createMockResponse(mockData));
+
+      const client = new CodecovClient({ baseUrl: 'https://codecov.io' });
+      const result = await client.getPullRequestCoverage('owner', 'repo', 123);
+
+      expect(global.fetch).toHaveBeenCalledWith(
+        'https://codecov.io/api/v2/gh/owner/repos/repo/pulls/123',
+        expect.any(Object)
+      );
+      expect(result).toEqual(mockData);
+    });
+
+    it('handles pull request number as integer', async () => {
+      const mockData = { coverage: 90.2 };
+      vi.mocked(global.fetch).mockResolvedValueOnce(createMockResponse(mockData));
+
+      const client = new CodecovClient({ baseUrl: 'https://codecov.io' });
+      await client.getPullRequestCoverage('owner', 'repo', 1);
+
+      expect(global.fetch).toHaveBeenCalledWith(
+        'https://codecov.io/api/v2/gh/owner/repos/repo/pulls/1',
+        expect.any(Object)
+      );
+    });
+
+    it('returns data from successful fetch', async () => {
+      const mockData = {
+        coverage: 85.7,
+        files: [{ name: 'test.ts', coverage: 92 }]
+      };
+      vi.mocked(global.fetch).mockResolvedValueOnce(createMockResponse(mockData));
+
+      const client = new CodecovClient({ baseUrl: 'https://codecov.io' });
+      const result = await client.getPullRequestCoverage('owner', 'repo', 456);
+
+      expect(result).toEqual(mockData);
+    });
+
+    it('propagates fetch errors', async () => {
+      vi.mocked(global.fetch).mockResolvedValueOnce(createMockResponse({}, 404, false));
+
+      const client = new CodecovClient({ baseUrl: 'https://codecov.io' });
+
+      await expect(client.getPullRequestCoverage('owner', 'repo', 999))
+        .rejects
+        .toThrow('Codecov API error: 404 Error');
+    });
+  });
+
+  describe('compareCoverage', () => {
+    it('fetches coverage comparison with valid params', async () => {
+      const mockData = {
+        diff: { coverage: 2.5 },
+        base: { coverage: 85.0 },
+        head: { coverage: 87.5 }
+      };
+      vi.mocked(global.fetch).mockResolvedValueOnce(createMockResponse(mockData));
+
+      const client = new CodecovClient({ baseUrl: 'https://codecov.io' });
+      const result = await client.compareCoverage('owner', 'repo', 'main', 'feature-branch');
+
+      expect(global.fetch).toHaveBeenCalledWith(
+        'https://codecov.io/api/v2/gh/owner/repos/repo/compare/main...feature-branch',
+        expect.any(Object)
+      );
+      expect(result).toEqual(mockData);
+    });
+
+    it('encodes special characters in base and head', async () => {
+      const mockData = { diff: { coverage: 1.2 } };
+      vi.mocked(global.fetch).mockResolvedValueOnce(createMockResponse(mockData));
+
+      const client = new CodecovClient({ baseUrl: 'https://codecov.io' });
+      await client.compareCoverage('owner', 'repo', 'feature/base-branch', 'feature/head-branch');
+
+      expect(global.fetch).toHaveBeenCalledWith(
+        'https://codecov.io/api/v2/gh/owner/repos/repo/compare/feature%2Fbase-branch...feature%2Fhead-branch',
+        expect.any(Object)
+      );
+    });
+
+    it('handles commit SHAs', async () => {
+      const mockData = { diff: { coverage: -0.5 } };
+      vi.mocked(global.fetch).mockResolvedValueOnce(createMockResponse(mockData));
+
+      const client = new CodecovClient({ baseUrl: 'https://codecov.io' });
+      await client.compareCoverage('owner', 'repo', 'abc123def456', 'def456abc123');
+
+      expect(global.fetch).toHaveBeenCalledWith(
+        'https://codecov.io/api/v2/gh/owner/repos/repo/compare/abc123def456...def456abc123',
+        expect.any(Object)
+      );
+    });
+
+    it('returns data from successful fetch', async () => {
+      const mockData = {
+        diff: { coverage: 3.2 },
+        files: [{ name: 'src/test.ts', coverage_change: 5.0 }]
+      };
+      vi.mocked(global.fetch).mockResolvedValueOnce(createMockResponse(mockData));
+
+      const client = new CodecovClient({ baseUrl: 'https://codecov.io' });
+      const result = await client.compareCoverage('owner', 'repo', 'v1.0', 'v2.0');
+
+      expect(result).toEqual(mockData);
+    });
+
+    it('propagates fetch errors', async () => {
+      vi.mocked(global.fetch).mockResolvedValueOnce(createMockResponse({}, 500, false));
+
+      const client = new CodecovClient({ baseUrl: 'https://codecov.io' });
+
+      await expect(client.compareCoverage('owner', 'repo', 'invalid', 'refs'))
+        .rejects
+        .toThrow('Codecov API error: 500 Error');
+    });
+  });
 });
 
 describe('main', () => {
@@ -550,10 +675,12 @@ describe('main', () => {
     // Verify it returns the tools array
     expect(result).toHaveProperty('tools');
     expect(result.tools).toBeInstanceOf(Array);
-    expect(result.tools.length).toBe(3);
+    expect(result.tools.length).toBe(5);
     expect(result.tools[0].name).toBe('get_file_coverage');
     expect(result.tools[1].name).toBe('get_commit_coverage');
     expect(result.tools[2].name).toBe('get_repo_coverage');
+    expect(result.tools[3].name).toBe('get_pull_request_coverage');
+    expect(result.tools[4].name).toBe('compare_coverage');
   });
 
   it('handles CallToolRequestSchema for get_file_coverage', async () => {
@@ -657,6 +784,85 @@ describe('main', () => {
           owner: 'test-owner',
           repo: 'test-repo',
           branch: 'main'
+        }
+      }
+    });
+
+    expect(result.content[0].type).toBe('text');
+    expect(JSON.parse(result.content[0].text)).toEqual(mockData);
+  });
+
+  it('handles CallToolRequestSchema for get_pull_request_coverage', async () => {
+    const handlers: any[] = [];
+    const mockSetRequestHandler = vi.fn((schema, handler) => {
+      handlers.push(handler);
+    });
+
+    vi.mocked(Server).mockImplementationOnce(function() { return {
+      setRequestHandler: mockSetRequestHandler,
+      connect: vi.fn(() => {}).mockResolvedValue(undefined),
+    } as any; });
+
+    vi.mocked(StdioServerTransport).mockImplementationOnce(function() { return {} as any; });
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    const mockData = {
+      coverage: 86.3,
+      head: { commit_sha: 'abc123' },
+      base: { commit_sha: 'def456' }
+    };
+    vi.mocked(global.fetch).mockResolvedValueOnce(createMockResponse(mockData));
+
+    await main();
+
+    const callToolHandler = handlers[1];
+    const result = await callToolHandler({
+      params: {
+        name: 'get_pull_request_coverage',
+        arguments: {
+          owner: 'test-owner',
+          repo: 'test-repo',
+          pull_number: 123
+        }
+      }
+    });
+
+    expect(result.content[0].type).toBe('text');
+    expect(JSON.parse(result.content[0].text)).toEqual(mockData);
+  });
+
+  it('handles CallToolRequestSchema for compare_coverage', async () => {
+    const handlers: any[] = [];
+    const mockSetRequestHandler = vi.fn((schema, handler) => {
+      handlers.push(handler);
+    });
+
+    vi.mocked(Server).mockImplementationOnce(function() { return {
+      setRequestHandler: mockSetRequestHandler,
+      connect: vi.fn(() => {}).mockResolvedValue(undefined),
+    } as any; });
+
+    vi.mocked(StdioServerTransport).mockImplementationOnce(function() { return {} as any; });
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    const mockData = {
+      diff: { coverage: 2.5 },
+      base: { coverage: 85.0 },
+      head: { coverage: 87.5 }
+    };
+    vi.mocked(global.fetch).mockResolvedValueOnce(createMockResponse(mockData));
+
+    await main();
+
+    const callToolHandler = handlers[1];
+    const result = await callToolHandler({
+      params: {
+        name: 'compare_coverage',
+        arguments: {
+          owner: 'test-owner',
+          repo: 'test-repo',
+          base: 'main',
+          head: 'feature-branch'
         }
       }
     });

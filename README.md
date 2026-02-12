@@ -66,6 +66,8 @@ Expected output: `codecov: mcp-server-codecov - ✓ Connected`
 - **File-level coverage**: Get detailed line-by-line coverage data for specific files
 - **Commit coverage**: Retrieve coverage statistics for individual commits
 - **Repository coverage**: Get overall coverage metrics for repositories
+- **Pull request coverage**: Analyze coverage changes and impact for pull requests
+- **Coverage comparison**: Compare coverage between branches, commits, or tags
 - **Configurable URL**: Point to any Codecov instance (codecov.io or self-hosted)
 - **Token authentication**: API token support for accessing coverage data
 
@@ -122,6 +124,47 @@ Get overall coverage statistics for a repository.
 ```
 Get overall coverage for owner/repo on main branch
 ```
+
+### get_pull_request_coverage
+
+Get coverage data for a specific pull request, including coverage changes and file-level impact.
+
+**Parameters:**
+- `owner` (required): Repository owner (username or organization)
+- `repo` (required): Repository name
+- `pull_number` (required): Pull request number
+
+**Example:**
+```
+Get coverage for pull request #123 in owner/repo
+```
+
+**Use Cases:**
+- Check if PR meets coverage thresholds before approving
+- Alert when PR decreases overall coverage
+- Identify which files in a PR lack coverage
+- Implement quality gates that block merges if coverage drops
+
+### compare_coverage
+
+Compare coverage between two git references (branches, commits, or tags).
+
+**Parameters:**
+- `owner` (required): Repository owner (username or organization)
+- `repo` (required): Repository name
+- `base` (required): Base reference (e.g., 'main', commit SHA)
+- `head` (required): Head reference to compare against base
+
+**Example:**
+```
+Compare coverage between main branch and feature-branch in owner/repo
+```
+
+**Use Cases:**
+- Compare coverage between release branches
+- Analyze coverage changes between any two commits
+- Track coverage trends across development cycles
+- Validate coverage improvements in feature branches
 
 ## Repository Activation
 
@@ -331,6 +374,8 @@ This server uses Codecov's API v2. The API endpoints follow this pattern:
 - File coverage: `/api/v2/gh/{owner}/repos/{repo}/file_report/{file_path}`
 - Commit coverage: `/api/v2/gh/{owner}/repos/{repo}/commits/{commit_sha}`
 - Repository coverage: `/api/v2/gh/{owner}/repos/{repo}`
+- Pull request coverage: `/api/v2/gh/{owner}/repos/{repo}/pulls/{pull_number}`
+- Coverage comparison: `/api/v2/gh/{owner}/repos/{repo}/compare/{base}...{head}`
 
 Currently supports GitHub repositories (`gh`). Support for other providers (GitLab, Bitbucket) can be added by modifying the API paths.
 

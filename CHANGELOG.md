@@ -5,6 +5,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-02-12
+
+### Added
+- **`get_pull_request_coverage` tool** - Get coverage data for specific pull requests (#98)
+  - Retrieves coverage changes and file-level impact for PRs
+  - Enables PR review automation and coverage regression detection
+  - API endpoint: `GET /api/v2/gh/{owner}/repos/{repo}/pulls/{pull_number}`
+- **`compare_coverage` tool** - Compare coverage between two git references (#98)
+  - Compare coverage between branches, commits, or tags
+  - Supports release comparison and coverage trend analysis
+  - API endpoint: `GET /api/v2/gh/{owner}/repos/{repo}/compare/{base}...{head}`
+
+### Enhanced
+- Updated README with comprehensive documentation for new tools
+  - Added examples and use cases for both new tools
+  - Updated Features section to highlight PR coverage and comparison capabilities
+  - Updated API Compatibility section with new endpoints
+
+### Testing
+- Added 22 new comprehensive unit tests for both tools
+- Maintained 93.65% code coverage (tools.ts at 100%)
+- All 80 tests passing
+
+### Use Cases
+- PR review automation with coverage threshold checks
+- Coverage regression detection in pull requests
+- File-level coverage analysis for code reviews
+- Quality gates that block merges on coverage drops
+- Release branch coverage comparisons
+
 ## [1.2.1] - 2026-02-12
 
 ### Removed
@@ -145,6 +175,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Comprehensive test suite with 97%+ code coverage
 - Published to npm registry as `mcp-server-codecov`
 
+[1.3.0]: https://github.com/egulatee/mcp-server-codecov/compare/v1.2.1...v1.3.0
+[1.2.1]: https://github.com/egulatee/mcp-server-codecov/compare/v1.1.0...v1.2.1
 [1.1.0]: https://github.com/egulatee/mcp-server-codecov/compare/v1.0.4...v1.1.0
 [1.0.4]: https://github.com/egulatee/mcp-server-codecov/compare/v1.0.3...v1.0.4
 [1.0.3]: https://github.com/egulatee/mcp-server-codecov/compare/v1.0.2...v1.0.3

@@ -77,6 +77,54 @@ export const TOOLS: Tool[] = [
       required: ["owner", "repo"],
     },
   },
+  {
+    name: "get_pull_request_coverage",
+    description: "Get coverage data for a specific pull request, including coverage changes and file-level impact.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        owner: {
+          type: "string",
+          description: "Repository owner (username or organization)",
+        },
+        repo: {
+          type: "string",
+          description: "Repository name",
+        },
+        pull_number: {
+          type: "number",
+          description: "Pull request number",
+        },
+      },
+      required: ["owner", "repo", "pull_number"],
+    },
+  },
+  {
+    name: "compare_coverage",
+    description: "Compare coverage between two git references (branches, commits, or tags).",
+    inputSchema: {
+      type: "object",
+      properties: {
+        owner: {
+          type: "string",
+          description: "Repository owner (username or organization)",
+        },
+        repo: {
+          type: "string",
+          description: "Repository name",
+        },
+        base: {
+          type: "string",
+          description: "Base reference (e.g., 'main', commit SHA)",
+        },
+        head: {
+          type: "string",
+          description: "Head reference to compare against base",
+        },
+      },
+      required: ["owner", "repo", "base", "head"],
+    },
+  },
 ];
 
 /**
@@ -142,6 +190,41 @@ export function createToolHandler(client: CodecovClient, config: CodecovConfig) 
             branch?: string;
           };
           const result = await client.getRepoCoverage(owner, repo, branch);
+          return {
+            content: [
+              {
+                type: "text" as const,
+                text: JSON.stringify(result, null, 2),
+              },
+            ],
+          };
+        }
+
+        case "get_pull_request_coverage": {
+          const { owner, repo, pull_number } = args as {
+            owner: string;
+            repo: string;
+            pull_number: number;
+          };
+          const result = await client.getPullRequestCoverage(owner, repo, pull_number);
+          return {
+            content: [
+              {
+                type: "text" as const,
+                text: JSON.stringify(result, null, 2),
+              },
+            ],
+          };
+        }
+
+        case "compare_coverage": {
+          const { owner, repo, base, head } = args as {
+            owner: string;
+            repo: string;
+            base: string;
+            head: string;
+          };
+          const result = await client.compareCoverage(owner, repo, base, head);
           return {
             content: [
               {
