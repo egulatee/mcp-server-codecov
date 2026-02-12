@@ -445,6 +445,138 @@ describe('CodecovClient', () => {
         .toThrow('Codecov API error: 401 Error');
     });
   });
+
+  describe('activateRepository', () => {
+    it('successfully activates repository with correct POST request', async () => {
+      const mockData = {
+        repository: {
+          name: 'test-repo',
+          active: true,
+          activated: true,
+          upload_token: 'test-token'
+        }
+      };
+      vi.mocked(global.fetch).mockResolvedValueOnce(createMockResponse(mockData));
+
+      const client = new CodecovClient({
+        baseUrl: 'https://codecov.io',
+        token: 'test-token'
+      });
+      const result = await client.activateRepository('owner', 'test-repo');
+
+      expect(global.fetch).toHaveBeenCalledWith(
+        'https://codecov.io/api/v2/gh/owner/repos/test-repo/activate',
+        expect.objectContaining({
+          method: 'POST',
+          headers: expect.objectContaining({
+            'Accept': 'application/json',
+            'Authorization': 'bearer test-token',
+            'Content-Type': 'application/json'
+          }),
+          body: '{}'
+        })
+      );
+      expect(result).toEqual(mockData);
+    });
+
+    it('sends correct URL for activation', async () => {
+      const mockData = { repository: { active: true } };
+      vi.mocked(global.fetch).mockResolvedValueOnce(createMockResponse(mockData));
+
+      const client = new CodecovClient({ baseUrl: 'https://codecov.io' });
+      await client.activateRepository('myorg', 'my-project');
+
+      expect(global.fetch).toHaveBeenCalledWith(
+        'https://codecov.io/api/v2/gh/myorg/repos/my-project/activate',
+        expect.any(Object)
+      );
+    });
+
+    it('includes Authorization header with bearer token', async () => {
+      const mockData = { repository: { active: true } };
+      vi.mocked(global.fetch).mockResolvedValueOnce(createMockResponse(mockData));
+
+      const client = new CodecovClient({
+        baseUrl: 'https://codecov.io',
+        token: 'my-secret-token'
+      });
+      await client.activateRepository('owner', 'repo');
+
+      const callArgs = vi.mocked(global.fetch).mock.calls[0];
+      const fetchOptions = callArgs[1] as RequestInit;
+      const headers = fetchOptions.headers as Record<string, string>;
+      expect(headers['Authorization']).toBe('bearer my-secret-token');
+    });
+
+    it('handles 401 authentication errors', async () => {
+      vi.mocked(global.fetch).mockResolvedValueOnce(
+        createMockResponse({}, 401, false)
+      );
+
+      const client = new CodecovClient({ baseUrl: 'https://codecov.io' });
+
+      await expect(client.activateRepository('owner', 'repo'))
+        .rejects
+        .toThrow('Codecov API error: 401 Error');
+    });
+
+    it('handles 403 permission denied errors', async () => {
+      vi.mocked(global.fetch).mockResolvedValueOnce(
+        createMockResponse({}, 403, false)
+      );
+
+      const client = new CodecovClient({
+        baseUrl: 'https://codecov.io',
+        token: 'test-token'
+      });
+
+      await expect(client.activateRepository('owner', 'repo'))
+        .rejects
+        .toThrow('Codecov API error: 403 Error');
+    });
+
+    it('handles 404 repository not found errors', async () => {
+      vi.mocked(global.fetch).mockResolvedValueOnce(
+        createMockResponse({}, 404, false)
+      );
+
+      const client = new CodecovClient({ baseUrl: 'https://codecov.io' });
+
+      await expect(client.activateRepository('owner', 'nonexistent-repo'))
+        .rejects
+        .toThrow('Codecov API error: 404 Error');
+    });
+
+    it('handles network errors', async () => {
+      vi.mocked(global.fetch).mockRejectedValueOnce(new Error('Network error'));
+
+      const client = new CodecovClient({ baseUrl: 'https://codecov.io' });
+
+      await expect(client.activateRepository('owner', 'repo'))
+        .rejects
+        .toThrow('Network error');
+    });
+
+    it('returns full API response data', async () => {
+      const mockData = {
+        repository: {
+          name: 'my-repo',
+          active: true,
+          activated: true,
+          upload_token: 'abc123',
+          private: false,
+          language: 'javascript'
+        }
+      };
+      vi.mocked(global.fetch).mockResolvedValueOnce(createMockResponse(mockData));
+
+      const client = new CodecovClient({ baseUrl: 'https://codecov.io' });
+      const result = await client.activateRepository('owner', 'my-repo');
+
+      expect(result).toEqual(mockData);
+      expect(result.repository.upload_token).toBe('abc123');
+    });
+  });
 });
 
 describe('main', () => {
@@ -550,10 +682,11 @@ describe('main', () => {
     // Verify it returns the tools array
     expect(result).toHaveProperty('tools');
     expect(result.tools).toBeInstanceOf(Array);
-    expect(result.tools.length).toBe(3);
+    expect(result.tools.length).toBe(4);
     expect(result.tools[0].name).toBe('get_file_coverage');
     expect(result.tools[1].name).toBe('get_commit_coverage');
     expect(result.tools[2].name).toBe('get_repo_coverage');
+    expect(result.tools[3].name).toBe('activate_repository');
   });
 
   it('handles CallToolRequestSchema for get_file_coverage', async () => {
@@ -663,6 +796,83 @@ describe('main', () => {
 
     expect(result.content[0].type).toBe('text');
     expect(JSON.parse(result.content[0].text)).toEqual(mockData);
+  });
+
+  it('handles CallToolRequestSchema for activate_repository', async () => {
+    const handlers: any[] = [];
+    const mockSetRequestHandler = vi.fn((schema, handler) => {
+      handlers.push(handler);
+    });
+
+    vi.mocked(Server).mockImplementationOnce(function() { return {
+      setRequestHandler: mockSetRequestHandler,
+      connect: vi.fn(() => {}).mockResolvedValue(undefined),
+    } as any; });
+
+    vi.mocked(StdioServerTransport).mockImplementationOnce(function() { return {} as any; });
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    const mockData = {
+      repository: {
+        name: 'test-repo',
+        active: true,
+        activated: true,
+        upload_token: 'test-token-123'
+      }
+    };
+    vi.mocked(global.fetch).mockResolvedValueOnce(createMockResponse(mockData));
+
+    await main();
+
+    const callToolHandler = handlers[1];
+    const result = await callToolHandler({
+      params: {
+        name: 'activate_repository',
+        arguments: {
+          owner: 'test-owner',
+          repo: 'test-repo'
+        }
+      }
+    });
+
+    expect(result.content[0].type).toBe('text');
+    expect(JSON.parse(result.content[0].text)).toEqual(mockData);
+  });
+
+  it('returns error for activate_repository on API failure', async () => {
+    const handlers: any[] = [];
+    const mockSetRequestHandler = vi.fn((schema, handler) => {
+      handlers.push(handler);
+    });
+
+    vi.mocked(Server).mockImplementationOnce(function() { return {
+      setRequestHandler: mockSetRequestHandler,
+      connect: vi.fn(() => {}).mockResolvedValue(undefined),
+    } as any; });
+
+    vi.mocked(StdioServerTransport).mockImplementationOnce(function() { return {} as any; });
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    vi.mocked(global.fetch).mockResolvedValueOnce(
+      createMockResponse({}, 403, false)
+    );
+
+    await main();
+
+    const callToolHandler = handlers[1];
+    const result = await callToolHandler({
+      params: {
+        name: 'activate_repository',
+        arguments: {
+          owner: 'test-owner',
+          repo: 'test-repo'
+        }
+      }
+    });
+
+    expect(result.isError).toBe(true);
+    expect(result.content[0].text).toContain('Error:');
+    expect(result.content[0].text).toContain('403');
   });
 
   it('handles unknown tool name', async () => {

@@ -77,6 +77,24 @@ export const TOOLS: Tool[] = [
       required: ["owner", "repo"],
     },
   },
+  {
+    name: "activate_repository",
+    description: "Activate coverage tracking for a repository on Codecov. This enables the repository to receive coverage uploads and must be done before uploading coverage reports. Requires admin permissions on the repository.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        owner: {
+          type: "string",
+          description: "Repository owner (username or organization)",
+        },
+        repo: {
+          type: "string",
+          description: "Repository name",
+        },
+      },
+      required: ["owner", "repo"],
+    },
+  },
 ];
 
 /**
@@ -142,6 +160,22 @@ export function createToolHandler(client: CodecovClient, config: CodecovConfig) 
             branch?: string;
           };
           const result = await client.getRepoCoverage(owner, repo, branch);
+          return {
+            content: [
+              {
+                type: "text" as const,
+                text: JSON.stringify(result, null, 2),
+              },
+            ],
+          };
+        }
+
+        case "activate_repository": {
+          const { owner, repo } = args as {
+            owner: string;
+            repo: string;
+          };
+          const result = await client.activateRepository(owner, repo);
           return {
             content: [
               {

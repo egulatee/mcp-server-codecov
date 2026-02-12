@@ -123,6 +123,45 @@ Get overall coverage statistics for a repository.
 Get overall coverage for owner/repo on main branch
 ```
 
+### activate_repository
+
+Activate coverage tracking for a repository on Codecov. This must be done before uploading coverage reports.
+
+**Parameters:**
+- `owner` (required): Repository owner (username or organization)
+- `repo` (required): Repository name
+
+**Requirements:**
+- User must have admin permissions on the repository
+- Repository must exist on GitHub and be accessible to your Codecov account
+
+**Returns:** Repository details including activation status and upload token
+
+**Example:**
+```typescript
+await activate_repository({
+  owner: "myorg",
+  repo: "my-project"
+})
+```
+
+**Response:**
+```json
+{
+  "repository": {
+    "name": "my-project",
+    "active": true,
+    "activated": true,
+    "upload_token": "abc123..."
+  }
+}
+```
+
+**Common errors:**
+- `403 Forbidden`: You don't have admin permissions on this repository
+- `404 Not Found`: Repository doesn't exist or isn't accessible in your Codecov account
+- `401 Unauthorized`: Invalid or missing CODECOV_TOKEN
+
 ## Verification and Troubleshooting
 
 ### Common Issues
@@ -315,6 +354,7 @@ This server uses Codecov's API v2. The API endpoints follow this pattern:
 - File coverage: `/api/v2/gh/{owner}/repos/{repo}/file_report/{file_path}`
 - Commit coverage: `/api/v2/gh/{owner}/repos/{repo}/commits/{commit_sha}`
 - Repository coverage: `/api/v2/gh/{owner}/repos/{repo}`
+- Repository activation: `POST /api/v2/gh/{owner}/repos/{repo}/activate`
 
 Currently supports GitHub repositories (`gh`). Support for other providers (GitLab, Bitbucket) can be added by modifying the API paths.
 
