@@ -12,10 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Retrieves coverage changes and file-level impact for PRs
   - Enables PR review automation and coverage regression detection
   - API endpoint: `GET /api/v2/gh/{owner}/repos/{repo}/pulls/{pull_number}`
+  - ✅ Verified working against codecov.io
 - **`compare_coverage` tool** - Compare coverage between two git references (#98)
   - Compare coverage between branches, commits, or tags
   - Supports release comparison and coverage trend analysis
-  - API endpoint: `GET /api/v2/gh/{owner}/repos/{repo}/compare/{base}...{head}`
+  - API endpoint: `GET /api/v2/gh/{owner}/repos/{repo}/compare/?base={base}&head={head}` (query parameters)
+  - ✅ Verified working against codecov.io
 
 ### Enhanced
 - Updated README with comprehensive documentation for new tools

@@ -68,6 +68,6 @@ export class CodecovClient {
   }
 
   async compareCoverage(owner: string, repo: string, base: string, head: string): Promise<any> {
-    return this.fetch(`/api/v2/gh/${owner}/repos/${repo}/compare/${encodeURIComponent(base)}...${encodeURIComponent(head)}`);
+    return this.fetch(`/api/v2/gh/${owner}/repos/${repo}/compare/?base=${encodeURIComponent(base)}&head=${encodeURIComponent(head)}`);
   }
 }

@@ -515,7 +515,7 @@ describe('CodecovClient', () => {
       const result = await client.compareCoverage('owner', 'repo', 'main', 'feature-branch');
 
       expect(global.fetch).toHaveBeenCalledWith(
-        'https://codecov.io/api/v2/gh/owner/repos/repo/compare/main...feature-branch',
+        'https://codecov.io/api/v2/gh/owner/repos/repo/compare/?base=main&head=feature-branch',
         expect.any(Object)
       );
       expect(result).toEqual(mockData);
@@ -529,7 +529,7 @@ describe('CodecovClient', () => {
       await client.compareCoverage('owner', 'repo', 'feature/base-branch', 'feature/head-branch');
 
       expect(global.fetch).toHaveBeenCalledWith(
-        'https://codecov.io/api/v2/gh/owner/repos/repo/compare/feature%2Fbase-branch...feature%2Fhead-branch',
+        'https://codecov.io/api/v2/gh/owner/repos/repo/compare/?base=feature%2Fbase-branch&head=feature%2Fhead-branch',
         expect.any(Object)
       );
     });
@@ -542,7 +542,7 @@ describe('CodecovClient', () => {
       await client.compareCoverage('owner', 'repo', 'abc123def456', 'def456abc123');
 
       expect(global.fetch).toHaveBeenCalledWith(
-        'https://codecov.io/api/v2/gh/owner/repos/repo/compare/abc123def456...def456abc123',
+        'https://codecov.io/api/v2/gh/owner/repos/repo/compare/?base=abc123def456&head=def456abc123',
         expect.any(Object)
       );
     });

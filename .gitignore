@@ -6,3 +6,8 @@ dist/
 coverage/
 .vitest/
 .claude/
+
+# Test files and local config
+test-*.cjs
+.mcpregistry_*
+server.json
