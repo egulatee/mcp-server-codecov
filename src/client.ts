@@ -62,4 +62,12 @@ export class CodecovClient {
     const branchParam = branch ? `?branch=${encodeURIComponent(branch)}` : "";
     return this.fetch(`/api/v2/gh/${owner}/repos/${repo}${branchParam}`);
   }
+
+  async getPullRequestCoverage(owner: string, repo: string, pullNumber: number): Promise<any> {
+    return this.fetch(`/api/v2/gh/${owner}/repos/${repo}/pulls/${pullNumber}`);
+  }
+
+  async compareCoverage(owner: string, repo: string, base: string, head: string): Promise<any> {
+    return this.fetch(`/api/v2/gh/${owner}/repos/${repo}/compare/?base=${encodeURIComponent(base)}&head=${encodeURIComponent(head)}`);
+  }
 }
