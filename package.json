@@ -1,6 +1,6 @@
 {
   "name": "mcp-server-codecov",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "MCP server for querying Codecov coverage data with configurable URL support",
   "mcpName": "io.github.egulatee/codecov",
   "publisher": "egulatee",

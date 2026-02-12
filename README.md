@@ -123,44 +123,21 @@ Get overall coverage statistics for a repository.
 Get overall coverage for owner/repo on main branch
 ```
 
-### activate_repository
+## Repository Activation
 
-Activate coverage tracking for a repository on Codecov. This must be done before uploading coverage reports.
+**Important Note**: Before a repository can receive coverage uploads, it must be activated in Codecov. This is a one-time setup step that **cannot be automated via API**.
 
-**Parameters:**
-- `owner` (required): Repository owner (username or organization)
-- `repo` (required): Repository name
+### Manual Activation Process
 
-**Requirements:**
-- User must have admin permissions on the repository
-- Repository must exist on GitHub and be accessible to your Codecov account
+To activate a repository for coverage tracking:
 
-**Returns:** Repository details including activation status and upload token
+1. Log in to your Codecov instance (e.g., [codecov.io](https://codecov.io))
+2. Navigate to your organization/user account
+3. Find the repository you want to activate
+4. Click the **"Activate"** button to enable coverage tracking
+5. Once activated, you can upload coverage reports from your CI/CD pipeline
 
-**Example:**
-```typescript
-await activate_repository({
-  owner: "myorg",
-  repo: "my-project"
-})
-```
-
-**Response:**
-```json
-{
-  "repository": {
-    "name": "my-project",
-    "active": true,
-    "activated": true,
-    "upload_token": "abc123..."
-  }
-}
-```
-
-**Common errors:**
-- `403 Forbidden`: You don't have admin permissions on this repository
-- `404 Not Found`: Repository doesn't exist or isn't accessible in your Codecov account
-- `401 Unauthorized`: Invalid or missing CODECOV_TOKEN
+**Why manual activation is required**: The Codecov API v2 does not provide a `/activate` endpoint. Repository activation must be done through the web UI or happens automatically on first coverage upload (depending on your Codecov configuration).
 
 ## Verification and Troubleshooting
 
@@ -354,7 +331,6 @@ This server uses Codecov's API v2. The API endpoints follow this pattern:
 - File coverage: `/api/v2/gh/{owner}/repos/{repo}/file_report/{file_path}`
 - Commit coverage: `/api/v2/gh/{owner}/repos/{repo}/commits/{commit_sha}`
 - Repository coverage: `/api/v2/gh/{owner}/repos/{repo}`
-- Repository activation: `POST /api/v2/gh/{owner}/repos/{repo}/activate`
 
 Currently supports GitHub repositories (`gh`). Support for other providers (GitLab, Bitbucket) can be added by modifying the API paths.
 
