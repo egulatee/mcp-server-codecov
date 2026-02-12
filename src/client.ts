@@ -12,7 +12,10 @@ export class CodecovClient {
     this.token = config.token;
   }
 
-  private async fetch(path: string): Promise<any> {
+  private async fetch(
+    path: string,
+    options?: { method?: string; body?: any }
+  ): Promise<any> {
     const url = `${this.baseUrl}${path}`;
     const headers: Record<string, string> = {
       "Accept": "application/json",
@@ -22,7 +25,21 @@ export class CodecovClient {
       headers["Authorization"] = `bearer ${this.token}`;
     }
 
-    const response = await fetch(url, { headers });
+    if (options?.body !== undefined) {
+      headers["Content-Type"] = "application/json";
+    }
+
+    const fetchOptions: RequestInit = { headers };
+
+    if (options?.method) {
+      fetchOptions.method = options.method;
+    }
+
+    if (options?.body !== undefined) {
+      fetchOptions.body = JSON.stringify(options.body);
+    }
+
+    const response = await fetch(url, fetchOptions);
 
     if (!response.ok) {
       throw new Error(`Codecov API error: ${response.status} ${response.statusText}`);
@@ -44,5 +61,12 @@ export class CodecovClient {
   async getRepoCoverage(owner: string, repo: string, branch?: string): Promise<any> {
     const branchParam = branch ? `?branch=${encodeURIComponent(branch)}` : "";
     return this.fetch(`/api/v2/gh/${owner}/repos/${repo}${branchParam}`);
+  }
+
+  async activateRepository(owner: string, repo: string): Promise<any> {
+    return this.fetch(`/api/v2/gh/${owner}/repos/${repo}/activate`, {
+      method: "POST",
+      body: {},
+    });
   }
 }
