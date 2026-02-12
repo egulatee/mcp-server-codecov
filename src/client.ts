@@ -62,11 +62,4 @@ export class CodecovClient {
     const branchParam = branch ? `?branch=${encodeURIComponent(branch)}` : "";
     return this.fetch(`/api/v2/gh/${owner}/repos/${repo}${branchParam}`);
   }
-
-  async activateRepository(owner: string, repo: string): Promise<any> {
-    return this.fetch(`/api/v2/gh/${owner}/repos/${repo}/activate`, {
-      method: "POST",
-      body: {},
-    });
-  }
 }

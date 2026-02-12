@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.1] - 2026-02-12
+
+### Removed
+- **`activate_repository` tool** - Removed non-existent API endpoint (#97)
+  - The CodeCov v2 API does not provide a `/activate` endpoint
+  - Repository activation must be done manually through the CodeCov web UI
+  - Added documentation explaining manual activation process in README
+
+### Fixed
+- Prevented user failures when attempting to use non-existent activation endpoint
+- Corrected API documentation to reflect actual CodeCov v2 API capabilities
+
+### Documentation
+- Added "Repository Activation" section to README explaining manual activation process
+- Clarified that activation cannot be automated via API
+- Removed all references to `activate_repository` tool from documentation
+
 ## [1.1.0] - 2025-12-21
 
 ### Changed
