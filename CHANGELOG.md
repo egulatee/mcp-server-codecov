@@ -5,6 +5,47 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-02-13
+
+### BREAKING CHANGES
+- **Package renamed** from `mcp-server-codecov` to `@egulatee/mcp-codecov` (#106)
+  - Follows modern scoped package conventions
+  - Aligns with `@modelcontextprotocol/*` naming pattern
+  - Users must update their `package.json` and installation commands
+
+### Changed
+- **Binary name**: `mcp-server-codecov` → `mcp-codecov` (cleaner, shorter)
+- **MCP server name**: `io.github.egulatee/codecov` → `@egulatee/codecov`
+- Updated all documentation for new package name (10 files)
+- Updated npm badges, installation examples, and troubleshooting guides
+
+### Migration Guide
+To upgrade from v1.x to v2.0.0:
+
+1. **Uninstall old package:**
+   ```bash
+   npm uninstall -g mcp-server-codecov
+   ```
+
+2. **Install new scoped package:**
+   ```bash
+   npm install -g @egulatee/mcp-codecov
+   ```
+
+3. **Update configuration** (if using `package.json` or config files):
+   ```diff
+   - "mcp-server-codecov": "^1.3.0"
+   + "@egulatee/mcp-codecov": "^2.0.0"
+   ```
+
+4. **Update binary references** (if calling directly):
+   ```diff
+   - mcp-server-codecov
+   + mcp-codecov
+   ```
+
+Note: The old package `mcp-server-codecov` will be deprecated on npm with a notice pointing to the new package.
+
 ## [1.3.0] - 2026-02-12
 
 ### Added
@@ -177,6 +218,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Comprehensive test suite with 97%+ code coverage
 - Published to npm registry as `@egulatee/mcp-codecov`
 
+[2.0.0]: https://github.com/egulatee/mcp-server-codecov/compare/v1.3.0...v2.0.0
 [1.3.0]: https://github.com/egulatee/mcp-server-codecov/compare/v1.2.1...v1.3.0
 [1.2.1]: https://github.com/egulatee/mcp-server-codecov/compare/v1.1.0...v1.2.1
 [1.1.0]: https://github.com/egulatee/mcp-server-codecov/compare/v1.0.4...v1.1.0
