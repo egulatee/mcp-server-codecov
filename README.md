@@ -1,7 +1,7 @@
 # MCP Server for Codecov
 
-[![npm version](https://img.shields.io/npm/v/mcp-server-codecov.svg)](https://www.npmjs.com/package/mcp-server-codecov)
-[![npm downloads](https://img.shields.io/npm/dm/mcp-server-codecov.svg)](https://www.npmjs.com/package/mcp-server-codecov)
+[![npm version](https://img.shields.io/npm/v/@egulatee/mcp-codecov.svg)](https://www.npmjs.com/package/@egulatee/mcp-codecov)
+[![npm downloads](https://img.shields.io/npm/dm/@egulatee/mcp-codecov.svg)](https://www.npmjs.com/package/@egulatee/mcp-codecov)
 [![codecov](https://codecov.io/gh/egulatee/mcp-server-codecov/branch/main/graph/badge.svg)](https://codecov.io/gh/egulatee/mcp-server-codecov)
 ![Test and Coverage](https://github.com/egulatee/mcp-server-codecov/workflows/Test%20and%20Coverage/badge.svg)
 [![Security Policy](https://img.shields.io/badge/Security-Policy-blue.svg)](https://github.com/egulatee/mcp-server-codecov/security/policy)
@@ -9,11 +9,11 @@
 ![Node.js Version](https://img.shields.io/badge/node-%3E%3D20.0.0-brightgreen)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.7+-blue.svg)
 ![MCP](https://img.shields.io/badge/MCP-Server-orange.svg)
-[![MCP Badge](https://lobehub.com/badge/mcp/egulatee-mcp-server-codecov)](https://lobehub.com/mcp/egulatee-mcp-server-codecov)
+[![MCP Badge](https://lobehub.com/badge/mcp/egulatee-mcp-codecov)](https://lobehub.com/mcp/egulatee-mcp-codecov)
 
 A Model Context Protocol (MCP) server that provides tools for querying Codecov coverage data. Supports both codecov.io and self-hosted Codecov instances with configurable URL endpoints.
 
-📦 **Published on npm:** [mcp-server-codecov](https://www.npmjs.com/package/mcp-server-codecov)
+📦 **Published on npm:** [@egulatee/mcp-codecov](https://www.npmjs.com/package/@egulatee/mcp-codecov)
 
 > **📖 Learn More**: Read about [building this MCP server with AI in just 2 hours](https://blog.aiaugmentedsoftwaredevelopment.com/posts/building-codecov-mcp-server-in-2-hours/).
 
@@ -46,7 +46,7 @@ Then reload: `source ~/.zshrc`
 claude mcp add --transport stdio codecov \
   --env CODECOV_BASE_URL=https://codecov.io \
   --env CODECOV_TOKEN=${CODECOV_TOKEN} \
-  -- npx -y mcp-server-codecov
+  -- npx -y @egulatee/mcp-codecov
 ```
 
 ### 4. Verify installation
@@ -55,7 +55,7 @@ claude mcp add --transport stdio codecov \
 claude mcp get codecov
 ```
 
-Expected output: `codecov: mcp-server-codecov - ✓ Connected`
+Expected output: `codecov: @egulatee/mcp-codecov - ✓ Connected`
 
 **That's it!** You can now use Codecov tools in Claude Code. See [Available Tools](#available-tools) below.
 
@@ -220,7 +220,7 @@ For self-hosted Codecov instances, use your instance URL:
 claude mcp add --transport stdio codecov \
   --env CODECOV_BASE_URL=https://codecov.your-company.com \
   --env CODECOV_TOKEN=${CODECOV_TOKEN} \
-  -- npx -y mcp-server-codecov
+  -- npx -y @egulatee/mcp-codecov
 ```
 
 ### Claude Desktop Setup
@@ -236,7 +236,7 @@ Add to your Claude Desktop configuration file:
   "mcpServers": {
     "codecov": {
       "command": "npx",
-      "args": ["-y", "mcp-server-codecov"],
+      "args": ["-y", "@egulatee/mcp-codecov"],
       "env": {
         "CODECOV_BASE_URL": "https://codecov.io",
         "CODECOV_TOKEN": "your-codecov-token-here"
@@ -255,7 +255,7 @@ Add to `~/.claude.json`:
   "mcpServers": {
     "codecov": {
       "command": "npx",
-      "args": ["-y", "mcp-server-codecov"],
+      "args": ["-y", "@egulatee/mcp-codecov"],
       "env": {
         "CODECOV_BASE_URL": "https://codecov.io",
         "CODECOV_TOKEN": "${CODECOV_TOKEN}"
@@ -273,20 +273,20 @@ Add to `~/.claude.json`:
 ### Installing from npm Globally
 
 ```bash
-npm install -g mcp-server-codecov
+npm install -g @egulatee/mcp-codecov
 ```
 
 **Benefits:**
 - Simple one-command installation
-- Automatic updates with `npm update -g mcp-server-codecov`
+- Automatic updates with `npm update -g @egulatee/mcp-codecov`
 - No manual build steps required
 - Works across all projects
 
 **Verify installation:**
 ```bash
-npm list -g mcp-server-codecov
-which mcp-server-codecov
-npm view mcp-server-codecov version
+npm list -g @egulatee/mcp-codecov
+which mcp-codecov
+npm view @egulatee/mcp-codecov version
 ```
 
 ### Development Installation (Source)

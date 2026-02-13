@@ -11,28 +11,28 @@ Before troubleshooting, verify the package is correctly installed:
 **Check package version:**
 ```bash
 # Check installed version
-npm list -g mcp-server-codecov
+npm list -g @egulatee/mcp-codecov
 
 # Verify command exists
-which mcp-server-codecov
+which mcp-codecov
 
 # View package info on npm
-npm view mcp-server-codecov version
-npm view mcp-server-codecov dist.tarball
+npm view @egulatee/mcp-codecov version
+npm view @egulatee/mcp-codecov dist.tarball
 ```
 
 **Expected output:**
 ```
 /Users/yourname/.npm-global/lib
-└── mcp-server-codecov@1.0.0
+└── @egulatee/mcp-codecov@1.0.0
 
-/Users/yourname/.npm-global/bin/mcp-server-codecov
+/Users/yourname/.npm-global/bin/mcp-codecov
 ```
 
 **Verify package contents:**
 ```bash
 # Check installed files
-ls -la $(npm root -g)/mcp-server-codecov/dist/
+ls -la $(npm root -g)/@egulatee/mcp-codecov/dist/
 
 # Should show:
 # index.js
@@ -44,7 +44,7 @@ ls -la $(npm root -g)/mcp-server-codecov/dist/
 **Test the command:**
 ```bash
 # Should start the MCP server
-mcp-server-codecov
+mcp-codecov
 
 # Expected output:
 # Codecov MCP Server running on stdio
@@ -52,7 +52,7 @@ mcp-server-codecov
 # Token configured: No (or Yes if CODECOV_TOKEN is set)
 ```
 
-### "command not found: mcp-server-codecov"
+### "command not found: mcp-codecov"
 
 After global installation, if the command is not found:
 
@@ -77,13 +77,13 @@ source ~/.zshrc
 
 **Solution 2: Reinstall globally**
 ```bash
-npm uninstall -g mcp-server-codecov
-npm install -g mcp-server-codecov
+npm uninstall -g @egulatee/mcp-codecov
+npm install -g @egulatee/mcp-codecov
 ```
 
 **Solution 3: Use npx (temporary)**
 ```bash
-npx mcp-server-codecov
+npx @egulatee/mcp-codecov
 ```
 
 ### Permission Denied During Install
@@ -103,12 +103,12 @@ echo 'export PATH=~/.npm-global/bin:$PATH' >> ~/.zshrc
 source ~/.zshrc
 
 # Reinstall package
-npm install -g mcp-server-codecov
+npm install -g @egulatee/mcp-codecov
 ```
 
 **Solution 2: Use sudo (Not Recommended)**
 ```bash
-sudo npm install -g mcp-server-codecov
+sudo npm install -g @egulatee/mcp-codecov
 ```
 
 ### Package Installation Fails
@@ -130,7 +130,7 @@ npm cache verify
 npm cache clean --force
 
 # Try different registry
-npm install -g mcp-server-codecov --registry=https://registry.npmjs.org
+npm install -g @egulatee/mcp-codecov --registry=https://registry.npmjs.org
 
 # Update npm
 npm install -g npm@latest
@@ -159,7 +159,7 @@ Update your configuration:
 {
   "mcpServers": {
     "codecov": {
-      "command": "mcp-server-codecov",
+      "command": "mcp-codecov",
       "env": {
         "CODECOV_BASE_URL": "https://codecov.io"
       }
@@ -215,7 +215,7 @@ source ~/.zshrc
 {
   "mcpServers": {
     "codecov": {
-      "command": "mcp-server-codecov",
+      "command": "mcp-codecov",
       "env": {
         "CODECOV_TOKEN": "your-actual-token"
       }
@@ -233,7 +233,7 @@ source ~/.zshrc
 **Diagnosis:**
 ```bash
 # Test the server manually
-mcp-server-codecov
+mcp-codecov
 
 # Should show:
 # Codecov MCP Server running on stdio
@@ -339,7 +339,7 @@ gh api repos/owner/repo/contents/path/to/file.ts
 **Diagnosis:**
 ```bash
 # Test with MCP Inspector
-npx @modelcontextprotocol/inspector mcp-server-codecov
+npx @modelcontextprotocol/inspector @egulatee/mcp-codecov
 
 # Lists available tools:
 # - get_file_coverage
@@ -478,7 +478,7 @@ Enable detailed logging:
 
 ```bash
 # Run server with stdio output visible
-mcp-server-codecov 2>&1 | tee /tmp/mcp-debug.log
+mcp-codecov 2>&1 | tee /tmp/mcp-debug.log
 
 # Check what's being logged
 tail -f /tmp/mcp-debug.log
@@ -488,32 +488,32 @@ tail -f /tmp/mcp-debug.log
 
 ```bash
 # Check what was installed
-npm list -g mcp-server-codecov
+npm list -g @egulatee/mcp-codecov
 
 # Verify dist folder exists
-ls -la $(npm root -g)/mcp-server-codecov/dist/
+ls -la $(npm root -g)/@egulatee/mcp-codecov/dist/
 
 # Check package.json
-cat $(npm root -g)/mcp-server-codecov/package.json
+cat $(npm root -g)/@egulatee/mcp-codecov/package.json
 ```
 
 ### Clean Reinstall
 
 ```bash
 # Complete clean reinstall
-npm uninstall -g mcp-server-codecov
+npm uninstall -g @egulatee/mcp-codecov
 npm cache clean --force
-npm install -g mcp-server-codecov
+npm install -g @egulatee/mcp-codecov
 
 # Verify
-mcp-server-codecov --help 2>&1 | head -5
+mcp-codecov --help 2>&1 | head -5
 ```
 
 ## Getting Help
 
 If you're still experiencing issues:
 
-1. **Check existing issues**: https://github.com/egulatee/mcp-server-codecov/issues
+1. **Check existing issues**: https://github.com/egulatee/@egulatee/mcp-codecov/issues
 2. **Create a new issue** with:
    - Your operating system
    - Node.js version: `node --version`
@@ -526,11 +526,11 @@ If you're still experiencing issues:
    # System info
    node --version
    npm --version
-   which mcp-server-codecov
-   npm list -g mcp-server-codecov
+   which mcp-codecov
+   npm list -g @egulatee/mcp-codecov
 
    # Test server
-   mcp-server-codecov 2>&1 | head -20
+   mcp-codecov 2>&1 | head -20
    ```
 
 ## Common Patterns
@@ -541,18 +541,18 @@ If nothing works, try this complete reset:
 
 ```bash
 # 1. Uninstall everything
-npm uninstall -g mcp-server-codecov
-rm -rf ~/.npm-global/lib/node_modules/mcp-server-codecov
+npm uninstall -g @egulatee/mcp-codecov
+rm -rf ~/.npm-global/lib/node_modules/@egulatee/mcp-codecov
 
 # 2. Clean npm cache
 npm cache clean --force
 
 # 3. Reinstall
-npm install -g mcp-server-codecov
+npm install -g @egulatee/mcp-codecov
 
 # 4. Verify installation
-which mcp-server-codecov
-mcp-server-codecov 2>&1 | head -5
+which mcp-codecov
+mcp-codecov 2>&1 | head -5
 
 # 5. Update configuration
 # (Edit Claude config files)
@@ -568,8 +568,8 @@ mcp-server-codecov 2>&1 | head -5
 
 Use this checklist to diagnose issues:
 
-- [ ] Server command exists: `which mcp-server-codecov`
-- [ ] Server runs manually: `mcp-server-codecov`
+- [ ] Server command exists: `which mcp-codecov`
+- [ ] Server runs manually: `mcp-codecov`
 - [ ] Environment variables set: `echo $CODECOV_TOKEN`
 - [ ] Configuration file valid: `python3 -m json.tool < ~/.claude.json`
 - [ ] Claude restarted after config changes

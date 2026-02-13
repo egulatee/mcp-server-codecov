@@ -48,7 +48,7 @@ export function createResourceHandler() {
 ## Installation
 
 \`\`\`bash
-npm install -g mcp-server-codecov
+npm install -g @egulatee/mcp-codecov
 \`\`\`
 
 ## Configuration
@@ -59,7 +59,7 @@ Set environment variables:
 
 ## Basic Usage
 
-1. Configure your MCP client to use \`mcp-server-codecov\`
+1. Configure your MCP client to use \`@egulatee/mcp-codecov\`
 2. Use the available tools:
    - \`get_repo_coverage\`: Get overall repository coverage
    - \`get_commit_coverage\`: Get coverage for specific commit

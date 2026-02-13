@@ -603,7 +603,7 @@ describe('main', () => {
     // Verify Server was created
     expect(Server).toHaveBeenCalledWith(
       {
-        name: 'mcp-server-codecov',
+        name: '@egulatee/mcp-codecov',
         version: packageJson.version,
       },
       {

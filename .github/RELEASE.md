@@ -1,6 +1,6 @@
 # Release Process Guide
 
-This comprehensive guide covers the complete release process for `mcp-server-codecov`, including standard procedures, troubleshooting, rollback procedures, and best practices.
+This comprehensive guide covers the complete release process for `@egulatee/mcp-codecov`, including standard procedures, troubleshooting, rollback procedures, and best practices.
 
 ## Table of Contents
 
@@ -23,7 +23,7 @@ Before creating any release, ensure you have the following configured:
 
 ### 1. npm Authentication
 
-You must have an npm account with publish permissions for `mcp-server-codecov`.
+You must have an npm account with publish permissions for `@egulatee/mcp-codecov`.
 
 ```bash
 # Test if you're logged in
@@ -294,17 +294,17 @@ Run through this checklist before pushing a version tag:
 npm pack
 
 # Inspect tarball contents
-tar -tzf mcp-server-codecov-*.tgz
+tar -tzf egulatee-mcp-codecov-*.tgz
 
 # Test installation from local tarball
-npm install -g ./mcp-server-codecov-*.tgz
+npm install -g ./egulatee-mcp-codecov-*.tgz
 
 # Verify installed package works
-mcp-server-codecov --help
+mcp-codecov --help
 
 # Clean up
-npm uninstall -g mcp-server-codecov
-rm mcp-server-codecov-*.tgz
+npm uninstall -g @egulatee/mcp-codecov
+rm egulatee-mcp-codecov-*.tgz
 ```
 
 **Test prepublishOnly Script:**
@@ -326,7 +326,7 @@ ls -la dist/
 
 ```bash
 # Check current version
-npm version --json | jq .mcp-server-codecov
+npm version --json | jq .@egulatee/mcp-codecov
 
 # Preview version bump (doesn't actually change it)
 npm version patch --dry-run
@@ -422,7 +422,7 @@ gh secret list | grep NPM_TOKEN
 
 3. **Verify token permissions:**
    - Token must have "Automation" type
-   - Must have publish permissions for mcp-server-codecov
+   - Must have publish permissions for @egulatee/mcp-codecov
 
 ### Issue 3: npm Publish Fails (Version Already Exists)
 
@@ -435,10 +435,10 @@ npm error You cannot publish over the previously published versions: 1.0.2
 
 ```bash
 # Check published versions
-npm view mcp-server-codecov versions
+npm view @egulatee/mcp-codecov versions
 
 # Check if version already exists
-npm view mcp-server-codecov@1.0.2 version
+npm view @egulatee/mcp-codecov@1.0.2 version
 ```
 
 **Solutions:**
@@ -499,7 +499,7 @@ gh release list
 ```
 npm error code ELIFECYCLE
 npm error errno 1
-npm error mcp-server-codecov@1.0.2 prepublishOnly: `npm test && npm run build`
+npm error @egulatee/mcp-codecov@1.0.2 prepublishOnly: `npm test && npm run build`
 ```
 
 **Diagnosis:**
@@ -544,7 +544,7 @@ npm test -- src/__tests__/index.test.ts
 **Symptoms:**
 ```
 npm error code ELIFECYCLE
-npm error mcp-server-codecov@1.0.2 build: `tsc`
+npm error @egulatee/mcp-codecov@1.0.2 build: `tsc`
 npm error Exit status 2
 ```
 
@@ -624,13 +624,13 @@ npm error You do not have permission to publish
 
 1. **Verify npm account** has publish permissions:
    ```bash
-   npm owner ls mcp-server-codecov
+   npm owner ls @egulatee/mcp-codecov
    # Your username should be listed
    ```
 
 2. **Add yourself as owner** (if needed):
    ```bash
-   npm owner add <your-username> mcp-server-codecov
+   npm owner add <your-username> @egulatee/mcp-codecov
    ```
 
 3. **Check package scope** (if using scoped package):
@@ -682,10 +682,10 @@ What to do if a release has critical bugs or needs to be reverted.
 
 ```bash
 # EXTREME CAUTION - Only use if absolutely necessary
-npm unpublish mcp-server-codecov@1.0.2
+npm unpublish @egulatee/mcp-codecov@1.0.2
 
 # Verify unpublished
-npm view mcp-server-codecov@1.0.2
+npm view @egulatee/mcp-codecov@1.0.2
 # Should show: npm error 404 Not Found
 ```
 
@@ -693,10 +693,10 @@ npm view mcp-server-codecov@1.0.2
 
 ```bash
 # Mark version as deprecated (preferred over unpublish)
-npm deprecate mcp-server-codecov@1.0.2 "Critical bug - use v1.0.3 instead"
+npm deprecate @egulatee/mcp-codecov@1.0.2 "Critical bug - use v1.0.3 instead"
 
 # Users will see warning when installing:
-# npm WARN deprecated mcp-server-codecov@1.0.2: Critical bug - use v1.0.3 instead
+# npm WARN deprecated @egulatee/mcp-codecov@1.0.2: Critical bug - use v1.0.3 instead
 ```
 
 ### Scenario 3: Delete/Update GitHub Release
@@ -805,7 +805,7 @@ gh release edit v1.0.2 --prerelease
 
 7. **Deprecate buggy version:**
    ```bash
-   npm deprecate mcp-server-codecov@1.0.2 "Critical bug - upgrade to v1.0.3"
+   npm deprecate @egulatee/mcp-codecov@1.0.2 "Critical bug - upgrade to v1.0.3"
    ```
 
 ---
@@ -920,7 +920,7 @@ git push origin v1.0.3
 gh run watch
 
 # Verify npm publish
-npm view mcp-server-codecov@1.0.3
+npm view @egulatee/mcp-codecov@1.0.3
 
 # Verify GitHub release
 gh release view v1.0.3
@@ -939,7 +939,7 @@ gh release view v1.0.3
 - All automated tests pass (`npm test`)
 - Affected functionality manually tested
 - Regression testing of related features
-- Installation test (`npm install -g ./mcp-server-codecov-*.tgz`)
+- Installation test (`npm install -g ./egulatee-mcp-codecov-*.tgz`)
 
 **Acceptable to Skip (for emergency only):**
 - Extended integration testing
@@ -958,51 +958,51 @@ After a release completes, verify everything worked correctly.
 
 ```bash
 # Check latest version
-npm view mcp-server-codecov version
+npm view @egulatee/mcp-codecov version
 
 # Should show: 1.0.2 (your new version)
 
 # View full package info
-npm view mcp-server-codecov
+npm view @egulatee/mcp-codecov
 
 # Check published files
-npm view mcp-server-codecov files
+npm view @egulatee/mcp-codecov files
 ```
 
 **2. Verify Package Metadata:**
 
 ```bash
 # Check package description
-npm view mcp-server-codecov description
+npm view @egulatee/mcp-codecov description
 
 # Verify repository URL
-npm view mcp-server-codecov repository.url
+npm view @egulatee/mcp-codecov repository.url
 
 # Check homepage
-npm view mcp-server-codecov homepage
+npm view @egulatee/mcp-codecov homepage
 ```
 
 **3. Test Installation:**
 
 ```bash
 # Install globally from npm
-npm install -g mcp-server-codecov@1.0.2
+npm install -g @egulatee/mcp-codecov@1.0.2
 
 # Verify command is available
-which mcp-server-codecov
+which mcp-codecov
 
 # Test execution
-mcp-server-codecov --version
+mcp-codecov --version
 
 # Uninstall
-npm uninstall -g mcp-server-codecov
+npm uninstall -g @egulatee/mcp-codecov
 ```
 
 **4. Test with npx:**
 
 ```bash
 # Test standard MCP pattern
-npx -y mcp-server-codecov
+npx -y @egulatee/mcp-codecov
 
 # Should start server without errors
 ```
@@ -1078,10 +1078,10 @@ gh run view <run-id> --log | grep -i warn
 mkdir /tmp/mcp-test && cd /tmp/mcp-test
 
 # Install package
-npm install mcp-server-codecov@1.0.2
+npm install @egulatee/mcp-codecov@1.0.2
 
 # Verify installation
-npx mcp-server-codecov --version
+npx mcp-codecov --version
 
 # Clean up
 cd ~ && rm -rf /tmp/mcp-test
@@ -1096,7 +1096,7 @@ cd ~ && rm -rf /tmp/mcp-test
   "mcpServers": {
     "codecov-test": {
       "command": "npx",
-      "args": ["-y", "mcp-server-codecov@1.0.2"],
+      "args": ["-y", "@egulatee/mcp-codecov@1.0.2"],
       "env": {
         "CODECOV_BASE_URL": "https://codecov.io"
       }
@@ -1121,7 +1121,7 @@ After each release, check:
 
 - [ ] **npm package published**
   ```bash
-  npm view mcp-server-codecov@1.0.2
+  npm view @egulatee/mcp-codecov@1.0.2
   ```
 
 - [ ] **GitHub release created**
@@ -1146,7 +1146,7 @@ After each release, check:
 
 - [ ] **Package installs correctly**
   ```bash
-  npx -y mcp-server-codecov@1.0.2
+  npx -y @egulatee/mcp-codecov@1.0.2
   ```
 
 - [ ] **README shows latest version**
@@ -1316,9 +1316,9 @@ npm run prepublishOnly
 ```bash
 # Before releasing, test local install
 npm pack
-npm install -g ./mcp-server-codecov-*.tgz
-mcp-server-codecov --version
-npm uninstall -g mcp-server-codecov
+npm install -g ./egulatee-mcp-codecov-*.tgz
+mcp-codecov --version
+npm uninstall -g @egulatee/mcp-codecov
 ```
 
 ### Documentation
@@ -1644,7 +1644,7 @@ Frequently asked questions about the release process.
 
 ```bash
 # Deprecate wrong version
-npm deprecate mcp-server-codecov@1.0.2 "Incorrect release - use v1.0.3"
+npm deprecate @egulatee/mcp-codecov@1.0.2 "Incorrect release - use v1.0.3"
 
 # Release correct version
 npm version patch  # 1.0.3
@@ -1734,9 +1734,9 @@ gh release create v2.0.0-alpha.1 --prerelease --notes "Alpha release for testing
 
 Users install with:
 ```bash
-npm install mcp-server-codecov@alpha
+npm install @egulatee/mcp-codecov@alpha
 # or specific version
-npm install mcp-server-codecov@2.0.0-alpha.1
+npm install @egulatee/mcp-codecov@2.0.0-alpha.1
 ```
 
 ### Q: What if the workflow fails halfway through?
@@ -1801,7 +1801,7 @@ git push origin v1.0.3
 
 **Requirements:**
 - Repository write access (to push tags)
-- npm publish permissions for mcp-server-codecov
+- npm publish permissions for @egulatee/mcp-codecov
 - Access to NPM_TOKEN secret (maintainers only)
 
 **Best practice:**
@@ -1818,7 +1818,7 @@ git push origin v1.0.3
 gh run list --workflow=release.yml --limit 1
 
 # 2. npm package published
-npm view mcp-server-codecov@1.0.2
+npm view @egulatee/mcp-codecov@1.0.2
 
 # 3. GitHub release created
 gh release view v1.0.2
@@ -1827,7 +1827,7 @@ gh release view v1.0.2
 git ls-remote --tags origin | grep v1.0.2
 
 # 5. Package installs correctly
-npx -y mcp-server-codecov@1.0.2
+npx -y @egulatee/mcp-codecov@1.0.2
 ```
 
 All must succeed for a successful release.
