@@ -154,8 +154,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed critical bug where MCP server failed to start when executed via npm bin symlink or npx (#28)
 - Added proper symlink resolution in main module detection using `realpathSync()`
 - Server now correctly starts with all three execution methods:
-  - `npx -y mcp-server-codecov` (standard MCP pattern)
-  - `mcp-server-codecov` (npm bin symlink)
+  - `npx -y @egulatee/mcp-codecov` (standard MCP pattern)
+  - `mcp-codecov` (npm bin symlink)
   - `node /path/to/dist/index.js` (direct execution)
 
 ### Changed
@@ -175,7 +175,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Configurable URL support for both codecov.io and self-hosted Codecov instances
 - API token authentication for private repositories
 - Comprehensive test suite with 97%+ code coverage
-- Published to npm registry as `mcp-server-codecov`
+- Published to npm registry as `@egulatee/mcp-codecov`
 
 [1.3.0]: https://github.com/egulatee/mcp-server-codecov/compare/v1.2.1...v1.3.0
 [1.2.1]: https://github.com/egulatee/mcp-server-codecov/compare/v1.1.0...v1.2.1

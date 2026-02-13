@@ -24,7 +24,7 @@ export async function startServer() {
 
   const server = new Server(
     {
-      name: "mcp-server-codecov",
+      name: "@egulatee/mcp-codecov",
       version: getPackageVersion(),
     },
     {

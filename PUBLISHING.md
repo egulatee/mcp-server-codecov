@@ -1,6 +1,6 @@
 # Publishing Guide
 
-This guide explains how to publish new versions of `mcp-server-codecov` to npm.
+This guide explains how to publish new versions of `@egulatee/mcp-codecov` to npm.
 
 ## Prerequisites
 
@@ -38,7 +38,7 @@ npm run test:integration
 
 **Automated via GitHub Actions (Recommended)**:
 
-1. Go to the GitHub repository: https://github.com/egulatee/mcp-server-codecov
+1. Go to the GitHub repository: https://github.com/egulatee/@egulatee/mcp-codecov
 2. Navigate to **Actions** → **Version Bump**
 3. Click **Run workflow**
 4. Select the version bump type:
@@ -77,7 +77,7 @@ The version bump workflow triggers the release workflow, which will automaticall
 
 **Monitor the release workflow**:
 ```
-https://github.com/egulatee/mcp-server-codecov/actions/workflows/release.yml
+https://github.com/egulatee/@egulatee/mcp-codecov/actions/workflows/release.yml
 ```
 
 **Expected workflow duration**: ~40 seconds
@@ -85,8 +85,8 @@ https://github.com/egulatee/mcp-server-codecov/actions/workflows/release.yml
 **Successful publication indicators**:
 - Version bump workflow: ✅ Success
 - Release workflow: ✅ Success
-- npm package updated: `npm view mcp-server-codecov version`
-- GitHub release created: https://github.com/egulatee/mcp-server-codecov/releases
+- npm package updated: `npm view @egulatee/mcp-codecov version`
+- GitHub release created: https://github.com/egulatee/@egulatee/mcp-codecov/releases
 
 **Verify Publication**:
 
@@ -94,19 +94,19 @@ After the workflow completes, verify the package was published:
 
 **Check npm:**
 ```bash
-npm view mcp-server-codecov version
-npm view mcp-server-codecov dist.tarball
+npm view @egulatee/mcp-codecov version
+npm view @egulatee/mcp-codecov dist.tarball
 ```
 
 **Check GitHub Releases:**
 ```
-https://github.com/egulatee/mcp-server-codecov/releases
+https://github.com/egulatee/@egulatee/mcp-codecov/releases
 ```
 
 **Test Installation:**
 ```bash
-npm install -g mcp-server-codecov@latest
-mcp-server-codecov --help 2>&1 | head -5
+npm install -g @egulatee/mcp-codecov@latest
+@egulatee/mcp-codecov --help 2>&1 | head -5
 ```
 
 ## Manual Publishing (Emergency Only)
@@ -170,7 +170,7 @@ npm version prerelease --preid=beta
 # Publish with beta tag
 npm publish --tag beta
 
-# Users install with: npm install mcp-server-codecov@beta
+# Users install with: npm install @egulatee/mcp-codecov@beta
 ```
 
 ## Troubleshooting
@@ -191,7 +191,7 @@ npm error 403 Forbidden - Two-factor authentication or granular access token wit
 1. Create a new Granular Access Token at: https://www.npmjs.com/settings/[USERNAME]/tokens/granular-access-tokens/new
 2. **CRITICAL**: Enable "Bypass two-factor authentication when using this token to publish"
 3. Set permissions: "Packages and scopes" → "Read and write"
-4. Select package: `mcp-server-codecov`
+4. Select package: `@egulatee/mcp-codecov`
 5. Set expiration (max 90 days for granular tokens)
 6. Copy token immediately
 7. Update GitHub secret: `gh secret set NPM_TOKEN`
@@ -227,7 +227,7 @@ git push origin v1.0.0
 **Solutions**:
 - Cannot unpublish after 72 hours
 - Bump to next version instead
-- If within 72 hours: `npm unpublish mcp-server-codecov@1.0.0`
+- If within 72 hours: `npm unpublish @egulatee/mcp-codecov@1.0.0`
 
 ## Security
 
@@ -243,10 +243,10 @@ The `--provenance` flag was removed from the publish workflow because:
 To verify package integrity, users can check:
 ```bash
 # Verify package tarball checksum
-npm view mcp-server-codecov dist.shasum
+npm view @egulatee/mcp-codecov dist.shasum
 
 # Check package integrity
-npm view mcp-server-codecov dist.integrity
+npm view @egulatee/mcp-codecov dist.integrity
 ```
 
 ### Token Management
@@ -265,7 +265,7 @@ npm has deprecated Classic tokens. You **must** use Granular Access Tokens with 
    - **Packages and scopes**:
      - Select "Read and write"
      - Choose "Only select packages and scopes"
-     - Add package: `mcp-server-codecov`
+     - Add package: `@egulatee/mcp-codecov`
    - **🚨 CRITICAL SETTING**:
      - **MUST ENABLE**: "Bypass two-factor authentication when using this token to publish"
      - Without this setting, CI/CD publishing will fail with E403 error
@@ -287,7 +287,7 @@ npm has deprecated Classic tokens. You **must** use Granular Access Tokens with 
 
 **Security Best Practices**:
 - Store as GitHub secret only (never commit)
-- Use minimal scope (only mcp-server-codecov package)
+- Use minimal scope (only @egulatee/mcp-codecov package)
 - Enable bypass 2FA only for CI/CD tokens
 - Monitor npm audit logs for unauthorized publish attempts
 
@@ -295,9 +295,9 @@ npm has deprecated Classic tokens. You **must** use Granular Access Tokens with 
 
 After a successful release:
 
-- [ ] Verify package on npm: `npm view mcp-server-codecov`
+- [ ] Verify package on npm: `npm view @egulatee/mcp-codecov`
 - [ ] Check GitHub release created
-- [ ] Test global installation: `npm install -g mcp-server-codecov`
+- [ ] Test global installation: `npm install -g @egulatee/mcp-codecov`
 - [ ] Update documentation if needed
 - [ ] Announce release (if major version)
 - [ ] Monitor for issues in first 24 hours
@@ -306,7 +306,7 @@ After a successful release:
 
 If you encounter issues publishing:
 
-1. Check [GitHub Actions logs](https://github.com/egulatee/mcp-server-codecov/actions)
-2. Verify [npm package page](https://www.npmjs.com/package/mcp-server-codecov)
-3. Review [GitHub releases](https://github.com/egulatee/mcp-server-codecov/releases)
+1. Check [GitHub Actions logs](https://github.com/egulatee/@egulatee/mcp-codecov/actions)
+2. Verify [npm package page](https://www.npmjs.com/package/@egulatee/mcp-codecov)
+3. Review [GitHub releases](https://github.com/egulatee/@egulatee/mcp-codecov/releases)
 4. Open an issue if automated publishing is broken
