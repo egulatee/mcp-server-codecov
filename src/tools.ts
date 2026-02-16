@@ -128,6 +128,22 @@ export const TOOLS: Tool[] = [
 ];
 
 /**
+ * Formats a tool response with optimized JSON serialization
+ * @param result - The result object to format
+ * @returns MCP-formatted tool response
+ */
+function formatToolResponse(result: unknown) {
+  return {
+    content: [
+      {
+        type: "text" as const,
+        text: JSON.stringify(result),
+      },
+    ],
+  };
+}
+
+/**
  * Creates the tool call handler function
  */
 export function createToolHandler(client: CodecovClient, config: CodecovConfig) {
@@ -156,14 +172,7 @@ export function createToolHandler(client: CodecovClient, config: CodecovConfig) 
             ref?: string;
           };
           const result = await client.getFileCoverage(owner, repo, file_path, ref);
-          return {
-            content: [
-              {
-                type: "text" as const,
-                text: JSON.stringify(result, null, 2),
-              },
-            ],
-          };
+          return formatToolResponse(result);
         }
 
         case "get_commit_coverage": {
@@ -173,14 +182,7 @@ export function createToolHandler(client: CodecovClient, config: CodecovConfig) 
             commit_sha: string;
           };
           const result = await client.getCommitCoverage(owner, repo, commit_sha);
-          return {
-            content: [
-              {
-                type: "text" as const,
-                text: JSON.stringify(result, null, 2),
-              },
-            ],
-          };
+          return formatToolResponse(result);
         }
 
         case "get_repo_coverage": {
@@ -190,14 +192,7 @@ export function createToolHandler(client: CodecovClient, config: CodecovConfig) 
             branch?: string;
           };
           const result = await client.getRepoCoverage(owner, repo, branch);
-          return {
-            content: [
-              {
-                type: "text" as const,
-                text: JSON.stringify(result, null, 2),
-              },
-            ],
-          };
+          return formatToolResponse(result);
         }
 
         case "get_pull_request_coverage": {
@@ -207,14 +202,7 @@ export function createToolHandler(client: CodecovClient, config: CodecovConfig) 
             pull_number: number;
           };
           const result = await client.getPullRequestCoverage(owner, repo, pull_number);
-          return {
-            content: [
-              {
-                type: "text" as const,
-                text: JSON.stringify(result, null, 2),
-              },
-            ],
-          };
+          return formatToolResponse(result);
         }
 
         case "compare_coverage": {
@@ -225,14 +213,7 @@ export function createToolHandler(client: CodecovClient, config: CodecovConfig) 
             head: string;
           };
           const result = await client.compareCoverage(owner, repo, base, head);
-          return {
-            content: [
-              {
-                type: "text" as const,
-                text: JSON.stringify(result, null, 2),
-              },
-            ],
-          };
+          return formatToolResponse(result);
         }
 
         default:

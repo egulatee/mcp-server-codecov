@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
-import type { CodecovConfig } from './types.js';
+import type { CodecovConfig, CacheConfig } from './types.js';
 
 /**
  * Log configuration warnings without blocking server startup
@@ -21,13 +21,29 @@ export function logConfigurationWarnings(): void {
 }
 
 /**
+ * Parse cache configuration from environment variables
+ */
+function getCacheConfig(): CacheConfig {
+  const enabled = process.env.CODECOV_CACHE_ENABLED !== 'false'; // Default: true
+  const ttl = parseInt(process.env.CODECOV_CACHE_TTL || '300000', 10); // Default: 5 minutes
+  const maxSize = parseInt(process.env.CODECOV_CACHE_MAX_SIZE || '100', 10); // Default: 100 entries
+
+  return {
+    enabled,
+    ttl: Number.isNaN(ttl) ? 300000 : ttl,
+    maxSize: Number.isNaN(maxSize) ? 100 : maxSize,
+  };
+}
+
+/**
  * Parse configuration from environment variables
  */
 export function getConfig(): CodecovConfig {
   const baseUrl = process.env.CODECOV_BASE_URL || "https://codecov.io";
   const token = process.env.CODECOV_TOKEN;
+  const cache = getCacheConfig();
 
-  return { baseUrl, token };
+  return { baseUrl, token, cache };
 }
 
 /**

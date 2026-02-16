@@ -1,4 +1,5 @@
 import type { CodecovConfig } from './types.js';
+import { LRUCache } from './cache.js';
 
 /**
  * Codecov API client for querying coverage data
@@ -6,13 +7,38 @@ import type { CodecovConfig } from './types.js';
 export class CodecovClient {
   private baseUrl: string;
   private token?: string;
+  private cache?: LRUCache<any>;
 
   constructor(config: CodecovConfig) {
     this.baseUrl = config.baseUrl.replace(/\/$/, ""); // Remove trailing slash
     this.token = config.token;
+
+    // Initialize cache if enabled
+    if (config.cache?.enabled) {
+      this.cache = new LRUCache(config.cache.maxSize, config.cache.ttl);
+    }
   }
 
   private async fetch(
+    path: string,
+    options?: { method?: string; body?: any }
+  ): Promise<any> {
+    // Only cache GET requests without body
+    const shouldCache = this.cache && !options?.method && !options?.body;
+    const cacheKey = shouldCache ? `${this.baseUrl}${path}` : '';
+
+    // Try to get from cache first
+    if (shouldCache && this.cache) {
+      return this.cache.getOrFetch(cacheKey, async () => {
+        return this.performFetch(path, options);
+      });
+    }
+
+    // Perform fetch without caching
+    return this.performFetch(path, options);
+  }
+
+  private async performFetch(
     path: string,
     options?: { method?: string; body?: any }
   ): Promise<any> {
