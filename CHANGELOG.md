@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] - 2026-02-17
+
+### Added
+- **Static tool manifest**: `tools.json` is now generated at build time and published as a versioned artifact (#114, #115)
+  - `dist/tools.json` produced by new `scripts/generate-tools-manifest.mjs` as part of `npm run build`
+  - Shape mirrors the MCP `tools/list` response (`{ version, generatedAt, tools: [...] }`); no translation layer needed by consumers
+  - Accessible via npm package export `@egulatee/mcp-codecov/tools.json`
+  - Copied to `/app/tools.json` in the Docker runtime image (well-known path for sidecars and init containers)
+  - Attached as a release asset (`tools.json`) on every GitHub Release
+  - Enables synchronous plugin hosts (e.g. OpenClaw `mcp-bridge`) to register tools without a live `tools/list` call at startup
+- `generate-manifest` npm script for standalone manifest regeneration after a build
+- CI: manifest structure validation step in `test.yml` (version present, tools array non-empty, required fields per tool)
+- Release: manifest validation + asset upload in `release.yml`
+
 ## [2.2.3] - 2026-02-17
 
 ### Added
