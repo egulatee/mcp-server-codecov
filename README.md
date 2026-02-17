@@ -13,7 +13,7 @@
 A Model Context Protocol (MCP) server that provides tools for querying Codecov coverage data. Supports both codecov.io and self-hosted Codecov instances with configurable URL endpoints.
 
 📦 **Published on npm:** [@egulatee/mcp-codecov](https://www.npmjs.com/package/@egulatee/mcp-codecov)
-🐳 **Docker image:** [ghcr.io/egulatee/mcp-server-codecov](https://ghcr.io/egulatee/mcp-server-codecov)
+🐳 **Docker image:** [ghcr.io/egulatee/mcp-server-codecov](https://github.com/egulatee/mcp-server-codecov/pkgs/container/mcp-server-codecov)
 
 > **📖 Learn More**: Read about [building this MCP server with AI in just 2 hours](https://blog.aiaugmentedsoftwaredevelopment.com/posts/building-codecov-mcp-server-in-2-hours/).
 
