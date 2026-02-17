@@ -10,5 +10,4 @@ docs/
 *.md
 .nvmrc
 vitest.config.ts
-tsconfig.json
 codecov.yml
