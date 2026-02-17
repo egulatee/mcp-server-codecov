@@ -310,6 +310,22 @@ docker run --rm -i \
 
 **Available tags:** `latest`, `2`, `2.1`, `2.1.0` (full semver)
 
+**stdio bridge with socat:**
+
+The Docker image includes [`socat`](https://linux.die.net/man/1/socat), which allows MCP clients that communicate over stdio to connect to the server running inside a container via a TCP socket:
+
+```bash
+# Start the server exposing a TCP port
+docker run --rm -p 3000:3000 \
+  -e CODECOV_TOKEN=your_token \
+  ghcr.io/egulatee/mcp-server-codecov
+
+# Bridge stdio ↔ TCP in a second terminal (or from your MCP client config)
+socat TCP:localhost:3000 STDIO
+```
+
+> **Note:** `socat` must also be installed on the **host machine** running the bridge command. Install with `brew install socat` (macOS), `apt install socat` (Debian/Ubuntu), or `apk add socat` (Alpine).
+
 ### Installing from npm Globally
 
 ```bash
