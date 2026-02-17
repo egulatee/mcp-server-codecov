@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.1] - 2026-02-17
+
+### Fixed
+- Docker multi-platform build: move `npm prune --omit=dev` into builder stage to avoid `npm` command-not-found (exit 127) under QEMU ARM64 emulation
+
 ## [2.2.0] - 2026-02-17
 
 ### Added
