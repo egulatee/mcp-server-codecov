@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.3] - 2026-02-17
+
+### Added
+- Docker: install `socat` in the Alpine runtime stage to support stdio↔TCP bridging for MCP clients connecting to containerized servers (#112)
+- README: document `socat` bridge pattern and host-side installation requirements under the Docker usage section
+
 ## [2.2.2] - 2026-02-17
 
 ### Fixed
