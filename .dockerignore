@@ -1,0 +1,14 @@
+node_modules
+dist
+.git
+.github
+coverage
+**/__tests__
+**/*.test.ts
+test/
+docs/
+*.md
+.nvmrc
+vitest.config.ts
+tsconfig.json
+codecov.yml
