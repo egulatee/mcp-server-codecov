@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- **Docker image**: Official multi-platform Docker image published to `ghcr.io/egulatee/mcp-server-codecov` on every release (#110)
+  - Supports `linux/amd64` and `linux/arm64` (Apple Silicon, AWS Graviton)
+  - Tags: `latest`, major (`2`), minor (`2.1`), patch (`2.1.0`)
+  - No Node.js installation required — run via `docker run`
+  - Non-root user (`node`) for security
+- `Dockerfile` (multi-stage, `node:20-alpine` base)
+- `.dockerignore` to keep build context lean
+- Docker build+push job in `release.yml` (runs after npm publish, uses `GITHUB_TOKEN`)
+
 ## [2.0.0] - 2026-02-13
 
 ### BREAKING CHANGES

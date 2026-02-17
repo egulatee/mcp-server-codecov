@@ -13,6 +13,7 @@
 A Model Context Protocol (MCP) server that provides tools for querying Codecov coverage data. Supports both codecov.io and self-hosted Codecov instances with configurable URL endpoints.
 
 📦 **Published on npm:** [@egulatee/mcp-codecov](https://www.npmjs.com/package/@egulatee/mcp-codecov)
+🐳 **Docker image:** [ghcr.io/egulatee/mcp-server-codecov](https://ghcr.io/egulatee/mcp-server-codecov)
 
 > **📖 Learn More**: Read about [building this MCP server with AI in just 2 hours](https://blog.aiaugmentedsoftwaredevelopment.com/posts/building-codecov-mcp-server-in-2-hours/).
 
@@ -268,6 +269,46 @@ Add to `~/.claude.json`:
 - Environment variable expansion is supported using `${VAR}` syntax
 - Variables like `${CODECOV_TOKEN}` will be read from your shell environment
 - The `-y` flag for npx automatically accepts the package installation prompt
+
+### Docker (no Node.js required)
+
+Pull and run the official multi-platform image from GitHub Container Registry:
+
+```bash
+docker run --rm -i \
+  -e CODECOV_TOKEN=your_token \
+  ghcr.io/egulatee/mcp-server-codecov
+```
+
+**Platforms:** `linux/amd64` and `linux/arm64` (Apple Silicon, AWS Graviton)
+
+**Claude Desktop** (`~/Library/Application Support/Claude/claude_desktop_config.json` on macOS):
+
+```json
+{
+  "mcpServers": {
+    "codecov": {
+      "command": "docker",
+      "args": [
+        "run", "--rm", "-i",
+        "-e", "CODECOV_TOKEN=your_token",
+        "ghcr.io/egulatee/mcp-server-codecov"
+      ]
+    }
+  }
+}
+```
+
+**With self-hosted Codecov:**
+
+```bash
+docker run --rm -i \
+  -e CODECOV_TOKEN=your_token \
+  -e CODECOV_BASE_URL=https://codecov.your-company.com \
+  ghcr.io/egulatee/mcp-server-codecov
+```
+
+**Available tags:** `latest`, `2`, `2.1`, `2.1.0` (full semver)
 
 ### Installing from npm Globally
 
