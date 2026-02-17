@@ -11,7 +11,8 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
-    }
+    },
+    "./tools.json": "./dist/tools.json"
   },
   "bin": {
     "mcp-codecov": "dist/index.js"
@@ -26,7 +27,8 @@
     "node": ">=20.0.0"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && node scripts/generate-tools-manifest.mjs",
+    "generate-manifest": "node scripts/generate-tools-manifest.mjs",
     "watch": "tsc --watch",
     "prepare": "npm run build",
     "prepublishOnly": "npm test && npm run build",

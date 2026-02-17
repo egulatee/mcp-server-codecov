@@ -47,12 +47,22 @@ jobs:
           sed -n "/## \[$VERSION\]/,/## \[/p" CHANGELOG.md | sed '$d' > release_notes.md
           cat release_notes.md
 
+      - name: Validate tools manifest
+        run: |
+          node -e "
+            const fs = require('fs');
+            const m = JSON.parse(fs.readFileSync('dist/tools.json', 'utf8'));
+            if (!Array.isArray(m.tools) || m.tools.length === 0) { process.exit(1); }
+            console.log('tools.json OK:', m.tools.length, 'tools, v' + m.version);
+          "
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
           body_path: release_notes.md
           draft: false
           prerelease: false
+          files: dist/tools.json
 
   docker:
     needs: release

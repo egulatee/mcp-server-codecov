@@ -40,6 +40,19 @@ jobs:
       - name: Build for integration tests
         run: npm run build
 
+      - name: Validate tools manifest
+        run: |
+          node -e "
+            const fs = require('fs');
+            const m = JSON.parse(fs.readFileSync('dist/tools.json', 'utf8'));
+            if (!m.version) throw new Error('missing version');
+            if (!Array.isArray(m.tools) || m.tools.length === 0) throw new Error('tools array empty or missing');
+            for (const t of m.tools) {
+              if (!t.name || !t.description || !t.inputSchema) throw new Error('malformed tool: ' + t.name);
+            }
+            console.log('tools.json OK:', m.tools.length, 'tools, v' + m.version);
+          "
+
       - name: Run integration tests
         run: npm run test:integration
 
