@@ -8,6 +8,7 @@ RUN npm run build && npm prune --omit=dev
 
 # Stage 2 — runtime (no npm calls, avoids QEMU cross-compilation issues)
 FROM node:20-alpine
+RUN apk add --no-cache socat
 WORKDIR /app
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
