@@ -12,6 +12,7 @@ export default defineConfig({
       exclude: [
         'src/**/*.test.ts',
         'src/**/__tests__/**',
+        'src/types.ts', // interface-only file — no executable JS generated
         'dist/**',
         'node_modules/**'
       ],

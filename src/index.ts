@@ -28,6 +28,7 @@ function isMainModule(): boolean {
     const executedScriptPath = realpathSync(process.argv[1]);
 
     return currentModulePath === executedScriptPath;
+  /* istanbul ignore next -- only reachable when realpathSync throws (e.g. broken symlink) */
   } catch {
     // If we can't determine, assume it's being run directly (safer for bin usage)
     return true;
@@ -52,6 +53,7 @@ export function runMainIfDirect(isDirectExec: boolean): void {
 }
 
 // Only run server if this file is being executed directly
+/* istanbul ignore next -- tested via runMainIfDirect; module-level execution only occurs when run as bin */
 if (isMainModule()) {
   startServer().catch(handleMainError);
 }

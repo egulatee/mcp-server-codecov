@@ -67,8 +67,9 @@ export function getPackageVersion(): string {
     const packageJsonPath = join(__dirname, '../package.json');
     const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
     return packageJson.version;
+  /* istanbul ignore next -- only reachable when package.json is missing or unreadable */
   } catch (error) {
     console.error('Warning: Could not read version from package.json');
-    return '1.1.0'; // Fallback to current version
+    return 'unknown'; // Fallback if package.json cannot be read
   }
 }

@@ -66,7 +66,10 @@ export class LRUCache<T> {
   }
 
   /**
-   * Check if key exists in cache and hasn't expired
+   * Check if key exists in cache and hasn't expired.
+   * Note: delegates to get(), which intentionally moves the entry to the
+   * most-recently-used position as a side effect of the read — this is
+   * correct LRU behaviour, not a bug.
    */
   has(key: string): boolean {
     return this.get(key) !== undefined;

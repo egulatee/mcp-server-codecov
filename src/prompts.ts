@@ -95,7 +95,7 @@ export function createPromptHandler() {
 
     // Generate appropriate prompt message based on template
     switch (name) {
-      case "analyze_coverage":
+      case "analyze_coverage": {
         return {
           description: "Analyze coverage for repository",
           messages: [
@@ -116,8 +116,9 @@ Use the get_repo_coverage tool to retrieve the data.`
             }
           ]
         };
+      }
 
-      case "compare_commits":
+      case "compare_commits": {
         return {
           description: "Compare coverage between commits",
           messages: [
@@ -138,8 +139,9 @@ Use the get_commit_coverage tool for both commits.`
             }
           ]
         };
+      }
 
-      case "find_low_coverage":
+      case "find_low_coverage": {
         const threshold = args.threshold || 80;
         return {
           description: "Find files with low coverage",
@@ -161,7 +163,9 @@ Use get_repo_coverage and get_file_coverage tools.`
             }
           ]
         };
+      }
 
+      /* istanbul ignore next -- unreachable: every entry in PROMPTS has a matching case */
       default:
         throw new Error(`Prompt implementation missing: ${name}`);
     }

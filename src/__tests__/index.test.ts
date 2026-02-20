@@ -70,36 +70,50 @@ describe('getConfig', () => {
 
 describe('CodecovClient', () => {
   describe('constructor', () => {
-    it('initializes with config', () => {
-      const config: CodecovConfig = { baseUrl: 'https://codecov.io', token: 'test-token' };
-      const client = new CodecovClient(config);
+    it('initializes with config and uses baseUrl in requests', async () => {
+      vi.mocked(global.fetch).mockResolvedValueOnce(createMockResponse({ coverage: 90 }));
+      const client = new CodecovClient({ baseUrl: 'https://codecov.io', token: 'test-token' });
       expect(client).toBeDefined();
-      expect(client['baseUrl']).toBe('https://codecov.io');
-      expect(client['token']).toBe('test-token');
+      await client.getRepoCoverage('owner', 'repo');
+      expect(global.fetch).toHaveBeenCalledWith(
+        expect.stringContaining('https://codecov.io'),
+        expect.any(Object)
+      );
     });
 
-    it('removes trailing slash from baseUrl', () => {
-      const config: CodecovConfig = { baseUrl: 'https://codecov.io/', token: 'test-token' };
-      const client = new CodecovClient(config);
-      expect(client['baseUrl']).toBe('https://codecov.io');
+    it('removes trailing slash from baseUrl (verified via fetch URL)', async () => {
+      vi.mocked(global.fetch).mockResolvedValueOnce(createMockResponse({ coverage: 90 }));
+      const client = new CodecovClient({ baseUrl: 'https://codecov.io/', token: 'test-token' });
+      await client.getRepoCoverage('owner', 'repo');
+      const [calledUrl] = vi.mocked(global.fetch).mock.calls[0] as [string, ...unknown[]];
+      expect(calledUrl).not.toContain('//api'); // no double-slash after base
+      expect(calledUrl).toContain('https://codecov.io/api');
     });
 
-    it('keeps baseUrl unchanged when no trailing slash', () => {
-      const config: CodecovConfig = { baseUrl: 'https://codecov.io', token: 'test-token' };
-      const client = new CodecovClient(config);
-      expect(client['baseUrl']).toBe('https://codecov.io');
+    it('keeps baseUrl unchanged when no trailing slash', async () => {
+      vi.mocked(global.fetch).mockResolvedValueOnce(createMockResponse({ coverage: 90 }));
+      const client = new CodecovClient({ baseUrl: 'https://codecov.io', token: 'test-token' });
+      await client.getRepoCoverage('owner', 'repo');
+      const [calledUrl] = vi.mocked(global.fetch).mock.calls[0] as [string, ...unknown[]];
+      expect(calledUrl).toContain('https://codecov.io/api');
     });
 
-    it('stores token when provided', () => {
-      const config: CodecovConfig = { baseUrl: 'https://codecov.io', token: 'my-token' };
-      const client = new CodecovClient(config);
-      expect(client['token']).toBe('my-token');
+    it('sends Authorization header when token is provided', async () => {
+      vi.mocked(global.fetch).mockResolvedValueOnce(createMockResponse({ coverage: 90 }));
+      const client = new CodecovClient({ baseUrl: 'https://codecov.io', token: 'my-token' });
+      await client.getRepoCoverage('owner', 'repo');
+      const callArgs = vi.mocked(global.fetch).mock.calls[0];
+      const headers = callArgs[1]?.headers as Record<string, string>;
+      expect(headers['Authorization']).toBe('bearer my-token');
     });
 
-    it('works without token', () => {
-      const config: CodecovConfig = { baseUrl: 'https://codecov.io' };
-      const client = new CodecovClient(config);
-      expect(client['token']).toBeUndefined();
+    it('omits Authorization header when no token provided', async () => {
+      vi.mocked(global.fetch).mockResolvedValueOnce(createMockResponse({ coverage: 90 }));
+      const client = new CodecovClient({ baseUrl: 'https://codecov.io' });
+      await client.getRepoCoverage('owner', 'repo');
+      const callArgs = vi.mocked(global.fetch).mock.calls[0];
+      const headers = callArgs[1]?.headers as Record<string, string>;
+      expect(headers['Authorization']).toBeUndefined();
     });
   });
 
@@ -1456,3 +1470,54 @@ describe('Resources handlers', () => {
     })).rejects.toThrow('Unknown resource: codecov://unknown/resource');
   });
 });
+
+// ---------------------------------------------------------------------------
+// Additional coverage: client.ts POST/body path
+// ---------------------------------------------------------------------------
+describe('CodecovClient fetch with body and method', () => {
+  it('sets Content-Type and serialises body for requests with a body', async () => {
+    const mockData = { ok: true };
+    vi.mocked(global.fetch).mockResolvedValueOnce(createMockResponse(mockData));
+
+    const client = new CodecovClient({ baseUrl: 'https://codecov.io', token: 'tok' });
+    // Call private fetch with a body to exercise lines 62, 68, 72 in client.ts
+    await client['fetch']('/api/v2/test', { method: 'POST', body: { key: 'value' } });
+
+    const callArgs = vi.mocked(global.fetch).mock.calls[0];
+    const options = callArgs[1] as RequestInit;
+    const headers = options.headers as Record<string, string>;
+
+    expect(headers['Content-Type']).toBe('application/json');
+    expect(options.method).toBe('POST');
+    expect(options.body).toBe(JSON.stringify({ key: 'value' }));
+  });
+});
+
+
+// ---------------------------------------------------------------------------
+// Additional coverage: server.ts token "Yes" branch (line 66)
+// ---------------------------------------------------------------------------
+describe('startServer with token configured', () => {
+  it('logs "Token configured: Yes" when CODECOV_TOKEN is set', async () => {
+    const originalToken = process.env.CODECOV_TOKEN;
+    process.env.CODECOV_TOKEN = 'my-secret-token';
+
+    vi.mocked(Server).mockImplementationOnce(function() {
+      return {
+        setRequestHandler: vi.fn(),
+        connect: vi.fn().mockResolvedValue(undefined),
+      } as any;
+    });
+    vi.mocked(StdioServerTransport).mockImplementationOnce(function() { return {} as any; });
+
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    await main();
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith('Token configured: Yes');
+
+    consoleErrorSpy.mockRestore();
+    process.env.CODECOV_TOKEN = originalToken;
+  });
+});
+
