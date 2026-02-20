@@ -1,6 +1,13 @@
 import type { Tool, CallToolRequest } from "@modelcontextprotocol/sdk/types.js";
 import type { CodecovClient } from './client.js';
-import type { CodecovConfig } from './types.js';
+import type {
+  CodecovConfig,
+  GetFileCoverageArgs,
+  GetCommitCoverageArgs,
+  GetRepoCoverageArgs,
+  GetPullRequestCoverageArgs,
+  CompareCoverageArgs,
+} from './types.js';
 import { validateConfigForExecution } from './config.js';
 
 /**
@@ -165,53 +172,31 @@ export function createToolHandler(client: CodecovClient, config: CodecovConfig) 
     try {
       switch (name) {
         case "get_file_coverage": {
-          const { owner, repo, file_path, ref } = args as {
-            owner: string;
-            repo: string;
-            file_path: string;
-            ref?: string;
-          };
+          const { owner, repo, file_path, ref } = args as unknown as GetFileCoverageArgs;
           const result = await client.getFileCoverage(owner, repo, file_path, ref);
           return formatToolResponse(result);
         }
 
         case "get_commit_coverage": {
-          const { owner, repo, commit_sha } = args as {
-            owner: string;
-            repo: string;
-            commit_sha: string;
-          };
+          const { owner, repo, commit_sha } = args as unknown as GetCommitCoverageArgs;
           const result = await client.getCommitCoverage(owner, repo, commit_sha);
           return formatToolResponse(result);
         }
 
         case "get_repo_coverage": {
-          const { owner, repo, branch } = args as {
-            owner: string;
-            repo: string;
-            branch?: string;
-          };
+          const { owner, repo, branch } = args as unknown as GetRepoCoverageArgs;
           const result = await client.getRepoCoverage(owner, repo, branch);
           return formatToolResponse(result);
         }
 
         case "get_pull_request_coverage": {
-          const { owner, repo, pull_number } = args as {
-            owner: string;
-            repo: string;
-            pull_number: number;
-          };
+          const { owner, repo, pull_number } = args as unknown as GetPullRequestCoverageArgs;
           const result = await client.getPullRequestCoverage(owner, repo, pull_number);
           return formatToolResponse(result);
         }
 
         case "compare_coverage": {
-          const { owner, repo, base, head } = args as {
-            owner: string;
-            repo: string;
-            base: string;
-            head: string;
-          };
+          const { owner, repo, base, head } = args as unknown as CompareCoverageArgs;
           const result = await client.compareCoverage(owner, repo, base, head);
           return formatToolResponse(result);
         }

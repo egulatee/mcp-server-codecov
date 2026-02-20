@@ -1,4 +1,11 @@
-import type { CodecovConfig } from './types.js';
+import type {
+  CodecovConfig,
+  FileCoverageResponse,
+  CommitCoverageResponse,
+  RepoCoverageResponse,
+  PullRequestCoverageResponse,
+  CompareCoverageResponse,
+} from './types.js';
 import { LRUCache } from './cache.js';
 
 /**
@@ -7,7 +14,7 @@ import { LRUCache } from './cache.js';
 export class CodecovClient {
   private baseUrl: string;
   private token?: string;
-  private cache?: LRUCache<any>;
+  private cache?: LRUCache<unknown>;
 
   constructor(config: CodecovConfig) {
     this.baseUrl = config.baseUrl.replace(/\/$/, ""); // Remove trailing slash
@@ -21,8 +28,8 @@ export class CodecovClient {
 
   private async fetch(
     path: string,
-    options?: { method?: string; body?: any }
-  ): Promise<any> {
+    options?: { method?: string; body?: unknown }
+  ): Promise<unknown> {
     // Only cache GET requests without body
     const shouldCache = this.cache && !options?.method && !options?.body;
     const cacheKey = shouldCache ? `${this.baseUrl}${path}` : '';
@@ -40,8 +47,8 @@ export class CodecovClient {
 
   private async performFetch(
     path: string,
-    options?: { method?: string; body?: any }
-  ): Promise<any> {
+    options?: { method?: string; body?: unknown }
+  ): Promise<unknown> {
     const url = `${this.baseUrl}${path}`;
     const headers: Record<string, string> = {
       "Accept": "application/json",
@@ -74,26 +81,26 @@ export class CodecovClient {
     return response.json();
   }
 
-  async getFileCoverage(owner: string, repo: string, filePath: string, ref?: string): Promise<any> {
+  async getFileCoverage(owner: string, repo: string, filePath: string, ref?: string): Promise<FileCoverageResponse> {
     const refParam = ref ? `?ref=${encodeURIComponent(ref)}` : "";
     const encodedPath = encodeURIComponent(filePath);
-    return this.fetch(`/api/v2/gh/${owner}/repos/${repo}/file_report/${encodedPath}${refParam}`);
+    return this.fetch(`/api/v2/gh/${owner}/repos/${repo}/file_report/${encodedPath}${refParam}`) as Promise<FileCoverageResponse>;
   }
 
-  async getCommitCoverage(owner: string, repo: string, commitSha: string): Promise<any> {
-    return this.fetch(`/api/v2/gh/${owner}/repos/${repo}/commits/${commitSha}`);
+  async getCommitCoverage(owner: string, repo: string, commitSha: string): Promise<CommitCoverageResponse> {
+    return this.fetch(`/api/v2/gh/${owner}/repos/${repo}/commits/${commitSha}`) as Promise<CommitCoverageResponse>;
   }
 
-  async getRepoCoverage(owner: string, repo: string, branch?: string): Promise<any> {
+  async getRepoCoverage(owner: string, repo: string, branch?: string): Promise<RepoCoverageResponse> {
     const branchParam = branch ? `?branch=${encodeURIComponent(branch)}` : "";
-    return this.fetch(`/api/v2/gh/${owner}/repos/${repo}${branchParam}`);
+    return this.fetch(`/api/v2/gh/${owner}/repos/${repo}${branchParam}`) as Promise<RepoCoverageResponse>;
   }
 
-  async getPullRequestCoverage(owner: string, repo: string, pullNumber: number): Promise<any> {
-    return this.fetch(`/api/v2/gh/${owner}/repos/${repo}/pulls/${pullNumber}`);
+  async getPullRequestCoverage(owner: string, repo: string, pullNumber: number): Promise<PullRequestCoverageResponse> {
+    return this.fetch(`/api/v2/gh/${owner}/repos/${repo}/pulls/${pullNumber}`) as Promise<PullRequestCoverageResponse>;
   }
 
-  async compareCoverage(owner: string, repo: string, base: string, head: string): Promise<any> {
-    return this.fetch(`/api/v2/gh/${owner}/repos/${repo}/compare/?base=${encodeURIComponent(base)}&head=${encodeURIComponent(head)}`);
+  async compareCoverage(owner: string, repo: string, base: string, head: string): Promise<CompareCoverageResponse> {
+    return this.fetch(`/api/v2/gh/${owner}/repos/${repo}/compare/?base=${encodeURIComponent(base)}&head=${encodeURIComponent(head)}`) as Promise<CompareCoverageResponse>;
   }
 }

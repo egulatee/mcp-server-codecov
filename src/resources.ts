@@ -14,34 +14,43 @@ function loadDocFile(relativePath: string): string {
 }
 
 /**
- * Available MCP resources for documentation and examples
+ * Single source of truth mapping URI → { file, mimeType }.
+ * Adding a new resource only requires a new entry here.
  */
-export const RESOURCES: Resource[] = [
-  {
-    uri: "codecov://docs/getting-started",
+const RESOURCE_FILES: Record<string, { file: string; mimeType: string; name: string; description: string }> = {
+  "codecov://docs/getting-started": {
+    file: "getting-started.md",
+    mimeType: "text/markdown",
     name: "Getting Started Guide",
     description: "Quick start guide for using the Codecov MCP server",
-    mimeType: "text/markdown"
   },
-  {
-    uri: "codecov://examples/github-actions",
+  "codecov://examples/github-actions": {
+    file: "examples/github-actions.yaml",
+    mimeType: "text/yaml",
     name: "GitHub Actions Integration",
     description: "Example GitHub Actions workflow for Codecov",
-    mimeType: "text/yaml"
   },
-  {
-    uri: "codecov://examples/query-patterns",
+  "codecov://examples/query-patterns": {
+    file: "query-patterns.md",
+    mimeType: "text/markdown",
     name: "Common Query Patterns",
     description: "Examples of common Codecov queries",
-    mimeType: "text/markdown"
   },
-  {
-    uri: "codecov://docs/configuration",
+  "codecov://docs/configuration": {
+    file: "configuration.md",
+    mimeType: "text/markdown",
     name: "Configuration Guide",
     description: "How to configure CODECOV_BASE_URL and CODECOV_TOKEN",
-    mimeType: "text/markdown"
-  }
-];
+  },
+};
+
+/**
+ * Available MCP resources for documentation and examples.
+ * Derived from RESOURCE_FILES so there is no duplication.
+ */
+export const RESOURCES: Resource[] = Object.entries(RESOURCE_FILES).map(
+  ([uri, { name, description, mimeType }]) => ({ uri, name, description, mimeType })
+);
 
 /**
  * Creates the resource read handler function
@@ -51,46 +60,13 @@ export function createResourceHandler() {
     const { uri } = request.params;
 
     try {
-      switch (uri) {
-        case "codecov://docs/getting-started":
-          return {
-            contents: [{
-              uri,
-              mimeType: "text/markdown",
-              text: loadDocFile('getting-started.md')
-            }]
-          };
-
-        case "codecov://examples/github-actions":
-          return {
-            contents: [{
-              uri,
-              mimeType: "text/yaml",
-              text: loadDocFile('examples/github-actions.yaml')
-            }]
-          };
-
-        case "codecov://examples/query-patterns":
-          return {
-            contents: [{
-              uri,
-              mimeType: "text/markdown",
-              text: loadDocFile('query-patterns.md')
-            }]
-          };
-
-        case "codecov://docs/configuration":
-          return {
-            contents: [{
-              uri,
-              mimeType: "text/markdown",
-              text: loadDocFile('configuration.md')
-            }]
-          };
-
-        default:
-          throw new Error(`Unknown resource: ${uri}`);
+      const meta = RESOURCE_FILES[uri];
+      if (!meta) {
+        throw new Error(`Unknown resource: ${uri}`);
       }
+      return {
+        contents: [{ uri, mimeType: meta.mimeType, text: loadDocFile(meta.file) }],
+      };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       throw new Error(`Failed to load resource ${uri}: ${errorMessage}`);
