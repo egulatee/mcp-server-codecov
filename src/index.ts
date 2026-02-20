@@ -25,7 +25,7 @@ function isMainModule(): boolean {
     const currentModulePath = fileURLToPath(import.meta.url);
 
     // Get the real path of the executed script (resolves symlinks)
-    const executedScriptPath = realpathSync(process.argv[1]);
+    const executedScriptPath = realpathSync(process.argv[1] ?? '');
 
     return currentModulePath === executedScriptPath;
   /* istanbul ignore next -- only reachable when realpathSync throws (e.g. broken symlink) */
