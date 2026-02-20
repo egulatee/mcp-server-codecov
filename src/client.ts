@@ -13,7 +13,7 @@ import { LRUCache } from './cache.js';
  */
 export class CodecovClient {
   private baseUrl: string;
-  private token?: string;
+  private token: string | undefined;
   private cache?: LRUCache<unknown>;
 
   constructor(config: CodecovConfig) {

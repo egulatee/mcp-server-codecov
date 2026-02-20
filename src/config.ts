@@ -43,7 +43,11 @@ export function getConfig(): CodecovConfig {
   const token = process.env.CODECOV_TOKEN;
   const cache = getCacheConfig();
 
-  return { baseUrl, token, cache };
+  return {
+    baseUrl,
+    ...(token !== undefined ? { token } : {}),
+    cache,
+  };
 }
 
 /**
