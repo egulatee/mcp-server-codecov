@@ -68,6 +68,7 @@ export function createResourceHandler() {
         contents: [{ uri, mimeType: meta.mimeType, text: loadDocFile(meta.file) }],
       };
     } catch (error) {
+      /* istanbul ignore next -- String(error) branch only reached for non-Error throws */
       const errorMessage = error instanceof Error ? error.message : String(error);
       throw new Error(`Failed to load resource ${uri}: ${errorMessage}`);
     }

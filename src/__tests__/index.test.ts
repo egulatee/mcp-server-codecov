@@ -1470,3 +1470,54 @@ describe('Resources handlers', () => {
     })).rejects.toThrow('Unknown resource: codecov://unknown/resource');
   });
 });
+
+// ---------------------------------------------------------------------------
+// Additional coverage: client.ts POST/body path
+// ---------------------------------------------------------------------------
+describe('CodecovClient fetch with body and method', () => {
+  it('sets Content-Type and serialises body for requests with a body', async () => {
+    const mockData = { ok: true };
+    vi.mocked(global.fetch).mockResolvedValueOnce(createMockResponse(mockData));
+
+    const client = new CodecovClient({ baseUrl: 'https://codecov.io', token: 'tok' });
+    // Call private fetch with a body to exercise lines 62, 68, 72 in client.ts
+    await client['fetch']('/api/v2/test', { method: 'POST', body: { key: 'value' } });
+
+    const callArgs = vi.mocked(global.fetch).mock.calls[0];
+    const options = callArgs[1] as RequestInit;
+    const headers = options.headers as Record<string, string>;
+
+    expect(headers['Content-Type']).toBe('application/json');
+    expect(options.method).toBe('POST');
+    expect(options.body).toBe(JSON.stringify({ key: 'value' }));
+  });
+});
+
+
+// ---------------------------------------------------------------------------
+// Additional coverage: server.ts token "Yes" branch (line 66)
+// ---------------------------------------------------------------------------
+describe('startServer with token configured', () => {
+  it('logs "Token configured: Yes" when CODECOV_TOKEN is set', async () => {
+    const originalToken = process.env.CODECOV_TOKEN;
+    process.env.CODECOV_TOKEN = 'my-secret-token';
+
+    vi.mocked(Server).mockImplementationOnce(function() {
+      return {
+        setRequestHandler: vi.fn(),
+        connect: vi.fn().mockResolvedValue(undefined),
+      } as any;
+    });
+    vi.mocked(StdioServerTransport).mockImplementationOnce(function() { return {} as any; });
+
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    await main();
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith('Token configured: Yes');
+
+    consoleErrorSpy.mockRestore();
+    process.env.CODECOV_TOKEN = originalToken;
+  });
+});
+

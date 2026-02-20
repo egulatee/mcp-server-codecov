@@ -165,6 +165,7 @@ Use get_repo_coverage and get_file_coverage tools.`
         };
       }
 
+      /* istanbul ignore next -- unreachable: every entry in PROMPTS has a matching case */
       default:
         throw new Error(`Prompt implementation missing: ${name}`);
     }
